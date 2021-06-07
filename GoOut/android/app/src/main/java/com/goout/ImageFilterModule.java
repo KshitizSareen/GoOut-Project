@@ -88,7 +88,7 @@ public class ImageFilterModule extends ReactContextBaseJavaModule {
         String Path=MediaStore.Images.Media.insertImage(this.getCurrentActivity().getContentResolver(),bmpgrey,"IMG_" + Guid.toString(),null);
         count+=1;
         Path=getFilePathFromUri(Uri.parse(Path));
-        promise.resolve(Path);
+        promise.resolve(bmpgrey.toString());
     }
     @ReactMethod
     protected void ProcessImage(Integer code,Promise promise) {
@@ -100,7 +100,7 @@ public class ImageFilterModule extends ReactContextBaseJavaModule {
         String Path=MediaStore.Images.Media.insertImage(this.getCurrentActivity().getContentResolver(),bmpcolor,"IMG_" + Guid.toString(),null);
         count+=1;
         Path=getFilePathFromUri(Uri.parse(Path));
-        promise.resolve(Path);
+        promise.resolve(bmpcolor.toString());
     }
 
         private String getFilePathFromUri(Uri uri) {

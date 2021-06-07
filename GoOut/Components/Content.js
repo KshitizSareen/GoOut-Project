@@ -13,6 +13,7 @@ var userid="";
 import ImagePicker from 'react-native-image-crop-picker';
 import FastImage from 'react-native-fast-image';
 import storage from '@react-native-firebase/storage';
+import EventUsers from './EventUsers.js';
 class Content extends Component{
     constructor() {
         super();
@@ -21,7 +22,6 @@ class Content extends Component{
             Price: 0,
             Chat: false,
             Photos: false,
-            Videos: false,
             Info: false,
             Name:"",
             Time:"",
@@ -35,7 +35,8 @@ class Content extends Component{
             ImageUrls: [],
             ShowLoadingAnimation: false,
             ShowIndicator: false,
-            ImageUri: "https://firebasestorage.googleapis.com/v0/b/goout-4391e.appspot.com/o/a1695e7b-5875-4314-bf70-b50c4a0386f3_200x200.png?alt=media&token=8c962cb0-02e9-4f51-bec2-e2699cebcfac"
+            ImageUri: "https://firebasestorage.googleapis.com/v0/b/goout-4391e.appspot.com/o/a1695e7b-5875-4314-bf70-b50c4a0386f3_200x200.png?alt=media&token=8c962cb0-02e9-4f51-bec2-e2699cebcfac",
+            Users: false
         };
       }
     componentDidMount(){
@@ -97,26 +98,26 @@ class Content extends Component{
 
         this.setState({Chat:true});
         this.setState({Photos:false});
-        this.setState({Videos: false});
         this.setState({Info: false});
+        this.setState({Users: false});
     }
     SetPhotos=()=>{
         this.setState({Chat:false});
         this.setState({Photos:true});
-        this.setState({Videos: false});
         this.setState({Info: false});
+        this.setState({Users: false});
     }
-    SetVideos=()=>{
+    SetUsers=()=>{
         this.setState({Chat:false});
         this.setState({Photos:false});
-        this.setState({Videos: true});
         this.setState({Info: false});
+        this.setState({Users: true});
     }
     SetInfo=()=>{
         this.setState({Chat:false});
         this.setState({Photos:false});
-        this.setState({Videos: false});
         this.setState({Info: true});
+        this.setState({Users: false});
     }
     ShowAnimation=(value)=>{
         this.setState({ShowLoadingAnimation: value});
@@ -185,6 +186,14 @@ class Content extends Component{
             );
          }
      }   
+     var DisplayUsers=()=>{
+        if(this.state.Users)
+        {
+           return(
+               <EventUsers userid={this.props.route.params.userid} eventid={this.props.route.params.eventid} navigation={this.props.navigation} ShowAnimation={this.ShowAnimation}/>
+           );
+        }
+    }   
         return(
             <View style={styles.Background}>
                 {
@@ -216,10 +225,15 @@ class Content extends Component{
                     }}>
                         <Text style={styles.PanelText}>Media</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.PanelLastButton} onPress={()=>{
+                    <TouchableOpacity style={styles.PanelButton} onPress={()=>{
                         this.SetInfo();
                     }}>
                         <Text style={styles.PanelText}>Info</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.PanelLastButton} onPress={()=>{
+                        this.SetUsers();
+                    }}>
+                        <Text style={styles.PanelText}>Members</Text>
                     </TouchableOpacity>
                 </View>
                 {
@@ -230,6 +244,9 @@ class Content extends Component{
                 }
                 {
                     DisplayInfo()
+                }
+                {
+                    DisplayUsers()
                 }
             </View>
         )
@@ -286,7 +303,7 @@ const styles=StyleSheet.create({
         borderRightWidth: 2,
         borderLeftWidth: 2,
         elevation: 5,
-        width: 0.33*windowWidth,
+        width: 0.25*windowWidth,
     },
     PanelFirstButton:{
         backgroundColor: '#dce8e7',
@@ -294,7 +311,7 @@ const styles=StyleSheet.create({
         borderRightColor: 'black',
         borderRightWidth: 2,
         elevation: 5,
-        width: 0.33*windowWidth,
+        width: 0.25*windowWidth,
     },
     PanelLastButton:{
         backgroundColor: '#dce8e7',
@@ -302,7 +319,7 @@ const styles=StyleSheet.create({
         borderLeftColor: 'black',
         borderLeftWidth: 2,
         elevation: 5,
-        width: 0.33*windowWidth,
+        width: 0.25*windowWidth,
     },
     PanelText:{
         textAlign: 'center',

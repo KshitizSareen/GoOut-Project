@@ -4,10 +4,47 @@ import {faList,  faUser} from '@fortawesome/free-solid-svg-icons';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Events from './EventsList';
 import Info from './Info';
+import messaging from '@react-native-firebase/messaging';
+import NetInfo from '@react-native-community/netinfo';
+import firestore  from '@react-native-firebase/firestore';
 const Tab=createBottomTabNavigator();
   class Tabs extends Component{
       componentDidMount(){
+          this.GetToken();
+          messaging().onNotificationOpenedApp(remoteMessage=>{
+            console.log(
+              'Notification caused app to open from background state:',
+              remoteMessage.notification.body,
+            );
+          })
+          messaging()
+        .getInitialNotification()
+        .then(remoteMessage => {
+          if (remoteMessage) {
+            console.log(
+              'Notification caused app to open from quit state:',
+              remoteMessage.notification.body,
+            );
+            console.log(remoteMessage.data);
+          }
+        }).catch(err=>{
+            console.log(err);
+        });
       }
+      GetToken=()=>{
+        NetInfo.fetch().then(state=>{
+            if(state.isConnected)
+            {
+                messaging().getToken().then(token=>{
+                    firestore().collection('Users').doc(this.props.route.params.userid).update({
+                        NotificationToken:token
+                    }).catch(err=>{
+                        console.log(err);
+                    })
+                 })
+            }
+        })
+    }
       render()
       {
           return(

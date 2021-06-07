@@ -11,6 +11,7 @@ import DocumentPicker from 'react-native-document-picker';
 const windowWidth = Dimensions.get('window').width;
 import RNFetchBlob from 'rn-fetch-blob';
 import RNFS from 'react-native-fs';
+import messaging from '@react-native-firebase/messaging';
 class Chat extends Component{
     constructor() {
         super();
@@ -45,7 +46,10 @@ class Chat extends Component{
                 this.setState({User: User});
             }
         })
-
+        messaging().onMessage(msg=>{
+            console.log(msg.notification.title);
+            this.GetMessages();
+        })
     }
     SendMessage=(type)=>{
         NetInfo.fetch().then((state)=>{

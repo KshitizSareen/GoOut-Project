@@ -1,26 +1,28 @@
 import React, {Component} from 'react';
 import NetInfo from '@react-native-community/netinfo';
-import { View,StyleSheet,Image,Text, Alert, KeyboardAvoidingView } from 'react-native';
+import { View,StyleSheet,Image,Text, Alert, BackHandler } from 'react-native';
 import {TextInput, TouchableOpacity } from 'react-native-gesture-handler';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-community/async-storage';
 import storage from '@react-native-firebase/storage';
 import  ImagePicker from 'react-native-image-crop-picker'
+import * as Progress from 'react-native-progress';
 class Info extends Component{
     constructor(){
         super();
         this.state={
             doc:{
                 Email:"",
-                Username:"",
                 Number:"",
                 Image: "",
             },
             code: "",
                 phone:"",
                 uri: "https://firebasestorage.googleapis.com/v0/b/goout-eb557.appspot.com/o/8-512.png?alt=media&token=12bc098a-0310-462c-a73c-872c360eaf3f",
-                ImageSelected: false
+                ImageSelected: false,
+                Username:"",
+                ShowLoadingAnimation: false
         };
     }
     ConfirmChanges=()=>{
@@ -49,6 +51,10 @@ class Info extends Component{
                             this.setState({phone: doc.data().Number.split(" ")[1]});
                             }
                             this.setState({uri: doc.data().Image});
+                            if(doc.data().Username!="")
+                            {
+                                this.setState({Username: doc.data().Username});
+                            }
                         }
                     })
 
@@ -85,96 +91,81 @@ class Info extends Component{
         })
     }
     SelectImage=()=>{
-        ImagePicker.showImagePicker(options, (response) => {
-          
-            if (response.didCancel) {
-            } else if (response.error) {
-            } else if (response.customButton) {
-            } else {
-          
-              // You can also display the image using data:
-              // const source = { uri: 'data:image/jpeg;base64,' + response.data };
-          
-              this.setState({
-                uri: response.uri,
-                ImageSelected: true
-              });
-              Alert.alert("","Do you want to set this Image as Display Image?",[
-                { text: "OK", onPress: () => this.UploadData()},
-                {
-                  text: "Cancel",
-                  onPress: () => {
-                      this.setState({uri:"https://firebasestorage.googleapis.com/v0/b/goout-eb557.appspot.com/o/8-512.png?alt=media&token=12bc098a-0310-462c-a73c-872c360eaf3f"})
-                  },
-                  style: "cancel"
-                },
-              ],);
-            }
-          });
+        ImagePicker.openPicker({
+            cropping: true,
+            mediaType: 'photo'
+        }).then((Image)=>{
+            var StorageRef=storage().ref(`User/${this.props.route.params.userid}/ImagePic`);
+            StorageRef.putFile(Image.path).on(
+                storage.TaskEvent.STATE_CHANGED,
+                snapshot=>{
+                    this.ShowAnimation(true);
+                    if(snapshot.state==storage.TaskState.SUCCESS)
+                    {
+                        StorageRef.getDownloadURL().then(downloadUrl=>{
+                            firestore().collection('Users').doc(this.props.route.params.userid).update({
+                                Image: downloadUrl
+                            })
+                            this.setState({uri: downloadUrl});
+                            this.ShowAnimation(false);
+                        })
+                    }
+                }
+            )
+
+        }).catch(err=>{
+
+        })
     }
     UploadData=()=>{
-        if(this.state.ImageSelected)
-        {
-            if(this.state.uri=="https://firebasestorage.googleapis.com/v0/b/goout-eb557.appspot.com/o/8-512.png?alt=media&token=12bc098a-0310-462c-a73c-872c360eaf3f")
-            {
-                NetInfo.fetch().then((state)=>{
-                    if(state.isConnected)
-                    {firestore().collection('Users').doc(this.userid).update({
-                      Image:this.state.uri
-                  });
-                    }
-                    else
-                    {
-                      Alert.alert("","Please connect to the internet")
-                    }
-                })
-            }
-            else
-            {
-                console.log(this.state.uri);
-                const fileExtension=this.state.uri.split('.').pop();
-    const uid=this.userid;
-    const fileName=`${uid}.${fileExtension}`;
-    var storageRef=storage().ref(`userImages/${fileName}`);
-    storageRef.putFile(this.state.uri).on(
-      storage.TaskEvent.STATE_CHANGED,
-      snapshot=>{
-        console.log("snapshot: "+snapshot.state);
-        console.log("progress: "+(snapshot.bytesTransferred/snapshot.totalBytes)*100);
-        if(snapshot.state==storage.TaskState.SUCCESS){
-          console.log("Success");
-          storageRef.getDownloadURL().then(downloadurl=>{
-            this.setState({uri: downloadurl});
-            firestore().collection('Users').doc(this.userid).update({
-                Image:downloadurl
-            });
-          });
-        }
-      },
-      error=>{
-        console.log("image upload error"+ error);
-      },
-      )
-            }
-        }
-        if(this.state.code!="" && this.state.phone!="")
+        if(this.state.code!="" && this.state.phone!="" && this.state.Username!="")
         {
             firestore().collection('Users').doc(this.userid).update({
-                Number: this.state.code+" "+this.state.phone
+                Number: this.state.code+" "+this.state.phone,
+                Username: this.state.Username
             });
 
         }
         else{
-            firestore().collection('Users').doc(this.userid).update({
-                Number: ""
-            });
+            Alert.alert("","Please enter a mobile number and username");
         }
 
 
     }
+    ShowAnimation=(value)=>{
+        this.setState({ShowLoadingAnimation: value});
+    }
+    HandleBackButton(){
+        return true;
+    }
     render(){
+        var ShowLoadingAnimation=()=>{
+            if(this.state.ShowLoadingAnimation)
+            {
+                BackHandler.addEventListener('hardwareBackPress',this.HandleBackButton);
+            return(
+                <View style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    width: '100%',
+                    height: '100%',
+                    alignSelf:'center',
+                    position: 'absolute'
+                }}>
+              <Progress.Circle size={80} indeterminate={true} />
+              </View>
+            )
+                  }
+                  else
+                  {
+                    BackHandler.removeEventListener('hardwareBackPress',this.HandleBackButton);
+                  }
+        }
         return(
-            <KeyboardAvoidingView style={styles.Background} behavior="height" enabled={true}>
+            <View style={styles.Background} behavior="height" enabled={true}>
+                {
+                    ShowLoadingAnimation()
+                }
                 <TouchableOpacity style={styles.ImageContainer} onPress={()=>{
                     this.SelectImage();
                 }}>
@@ -189,7 +180,9 @@ class Info extends Component{
                         <Text style={styles.TextLabel}>Email:</Text><TextInput style={styles.TextFields} keyboardType={"phone-pad"} value={this.state.doc.Email} editable={false}/>
                         </View>
                         <View style={styles.TextContainerInput}>
-                    <Text style={styles.TextLabel}>Username:</Text><TextInput style={styles.TextFields} keyboardType={"phone-pad"} value={this.state.doc.Username} editable={false}/>
+                    <Text style={styles.TextLabel}>Username:</Text><TextInput style={styles.TextFields} value={this.state.Username} onChange={(value)=>{
+                        this.setState({Username: value.nativeEvent.text});
+                    }}/>
                     </View>
                         <View style={styles.TextContainerInput}>
                         <Text style={styles.TextLabel}>Number:</Text><TextInput style={styles.code} keyboardType={"phone-pad"} value={this.state.code} onChangeText={(value)=>{
@@ -212,7 +205,7 @@ class Info extends Component{
                 <Text style={styles.Text3}>Logout</Text>
             </TouchableOpacity>
             </View>
-                </KeyboardAvoidingView>
+                </View>
         )
     }
 }
@@ -223,8 +216,8 @@ const styles=StyleSheet.create({
         borderRadius: 70,
     },
     ImageContainer:{
-        marginTop: '70%',
-        marginBottom: '5%'
+        marginTop: '90%',
+        marginBottom: '5%',
     },
     TextContainer:{
         flexDirection: 'column',
@@ -261,7 +254,6 @@ const styles=StyleSheet.create({
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        paddingBottom: '10%',
     },
     Button:{
         backgroundColor: 'lightblue',

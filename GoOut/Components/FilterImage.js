@@ -65,18 +65,6 @@ class FilterImage extends Component{
         });
     }
 }
-    componentWillUnmount(){
-    this.TrashArray.forEach(Uri=>{
-        if(Uri!=this.state.ImageUri)
-        {
-        RNFetchBlob.fs.unlink(Uri).then(()=>{
-            console.log("FIle Deleted");
-        }).catch(()=>{
-            console.log("Error Occured");
-        })
-    }
-    })
-}
     render(){
         return(
             <View style={styles.Background}>
