@@ -150,7 +150,8 @@ class Info extends Component{
                     width: '100%',
                     height: '100%',
                     alignSelf:'center',
-                    position: 'absolute'
+                    position: 'absolute',
+                    backgroundColor: 'white'
                 }}>
               <Progress.Circle size={80} indeterminate={true} />
               </View>
@@ -163,9 +164,6 @@ class Info extends Component{
         }
         return(
             <View style={styles.Background} behavior="height" enabled={true}>
-                {
-                    ShowLoadingAnimation()
-                }
                 <TouchableOpacity style={styles.ImageContainer} onPress={()=>{
                     this.SelectImage();
                 }}>
@@ -180,7 +178,7 @@ class Info extends Component{
                         <Text style={styles.TextLabel}>Email:</Text><TextInput style={styles.TextFields} keyboardType={"phone-pad"} value={this.state.doc.Email} editable={false}/>
                         </View>
                         <View style={styles.TextContainerInput}>
-                    <Text style={styles.TextLabel}>Username:</Text><TextInput style={styles.TextFields} value={this.state.Username} onChange={(value)=>{
+                    <Text style={styles.TextLabel}>Username:</Text><TextInput style={styles.TextFields} value={this.state.Username} editable={false} onChange={(value)=>{
                         this.setState({Username: value.nativeEvent.text});
                     }}/>
                     </View>
@@ -205,6 +203,9 @@ class Info extends Component{
                 <Text style={styles.Text3}>Logout</Text>
             </TouchableOpacity>
             </View>
+            {
+                    ShowLoadingAnimation()
+                }
                 </View>
         )
     }

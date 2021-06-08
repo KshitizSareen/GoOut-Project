@@ -4,6 +4,7 @@ import urllib.request
 from tempfile import NamedTemporaryFile
 import uuid
 import pyrebase
+from skimage import io
 
 
 firebaseConfig = {
@@ -31,9 +32,8 @@ def ProcessImage(request):
     firebase=pyrebase.initialize_app(firebaseConfig)
     storage=firebase.storage()
     url=request
-    req=urllib.request.urlopen(url)
-    arr = np.asarray(bytearray(req.read()), dtype=np.uint8)
-    imgOriginal=cv2.imdecode(arr,-1)
+    req=io.imread(url)
+    imgOriginal=cv2.cvtColor(req,cv2.COLOR_BGR2RGB)
     imgGray=cv2.cvtColor(imgOriginal,cv2.COLOR_BGR2GRAY)
     Uris={
 
@@ -58,4 +58,4 @@ def ProcessImage(request):
             Uris[temp_file]=DownloadUrl
     return Uris
 
-ProcessImage("https://firebasestorage.googleapis.com/v0/b/goout-4391e.appspot.com/o/a1695e7b-5875-4314-bf70-b50c4a0386f3_200x200.png?alt=media&token=8c962cb0-02e9-4f51-bec2-e2699cebcfac")
+ProcessImage("https://firebasestorage.googleapis.com/v0/b/goout-4391e.appspot.com/o/Event%2FChat%2FIMG_20201104_092751.jpg?alt=media&token=fcf87725-05aa-47ec-913d-7c394bdfacd3")

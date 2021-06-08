@@ -37,12 +37,12 @@ class LoadDocuments extends Component{
                                      NetInfo.fetch().then((state)=>{
                                          if(state.isConnected)
                                          {
-                                             RNFetchBlob.fs.exists(RNFetchBlob.fs.dirs.DocumentDir+'/GoOut/'+data.item.FilePath).then(async res=>{
+                                             RNFetchBlob.fs.exists(RNFetchBlob.fs.dirs.DocumentDir+'/'+data.item.FilePath).then(async res=>{
                                                  if(res==true)
                                                  {
                                                      console.log("Exists");
-                                                     console.log(RNFetchBlob.fs.dirs.DocumentDir+'/GoOut/'+data.item.FilePath);
-                                                    FileViewer.open("file://"+RNFetchBlob.fs.dirs.DocumentDir+'/GoOut/'+data.item.FilePath);
+                                                     console.log(RNFetchBlob.fs.dirs.DocumentDir+'/'+data.item.FilePath);
+                                                    FileViewer.open("file://"+RNFetchBlob.fs.dirs.DocumentDir+'/'+data.item.FilePath);
                                                  }
                                                  else
                                                  {
@@ -54,7 +54,7 @@ class LoadDocuments extends Component{
                                                       // add this option that makes response data to be stored as a file,
                                                       // this is much more performant.
                                                       fileCache : true,
-                                                      path: RNFetchBlob.fs.dirs.DocumentDir+'/GoOut/'+data.item.FilePath,
+                                                      path: RNFetchBlob.fs.dirs.DocumentDir+'/'+data.item.FilePath,
                                                     })
                                                     .fetch('GET', data.item.downloadurl, {
                                                       //some headers ..
@@ -65,7 +65,7 @@ class LoadDocuments extends Component{
                                                      ShowLoadingIndicator[data.index]=false;
                                                      this.setState({ShowLoadingIndicator: ShowLoadingIndicator});
                                                       console.log('The file saved to ', result.path());
-                                                      FileViewer.open("file://"+RNFetchBlob.fs.dirs.DocumentDir+'/GoOut/'+data.item.FilePath);
+                                                      FileViewer.open("file://"+RNFetchBlob.fs.dirs.DocumentDir+'/'+data.item.FilePath);
                                                     })
                                                  }
                                              })

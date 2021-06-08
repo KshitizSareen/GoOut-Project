@@ -127,9 +127,9 @@ class Chat extends Component{
             for (const res of results) {
                 console.log(res.uri);
                 const uriComponents = res.uri.split('/');
-                const destPath = `${RNFetchBlob.fs.dirs.DocumentDir}/GoOut/${this.props.userid}/${res.name}`;
+                const destPath = `${RNFetchBlob.fs.dirs.DocumentDir}/${res.name}`;
                 var FileObject={};
-                FileObject.FilePath=`${this.props.userid}/${res.name}`;
+                FileObject.FilePath=`${res.name}`;
                 FileObject.DestPath="file://"+destPath;
                 FileObject.FileName=res.name;
                 console.log(destPath);
@@ -283,9 +283,6 @@ class Chat extends Component{
         this.UploadPDF();
     }}><FontAwesomeIcon icon={faFile} size="30" color="lightblue"/></TouchableOpacity>
     </View>
-    <TextInput style={styles.CaptionInput} placeholder="Enter your caption" value={this.state.Caption} onChangeText={(value)=>{
-        this.setState({Caption: value});
-    }}/>
                   </View>
                 </View>
               </Modal>

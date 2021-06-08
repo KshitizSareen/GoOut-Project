@@ -25,31 +25,12 @@ class SignIn extends Component{
             usernameCreate:"",
             passwordCreate: "",
             displayName: "",
+            FirstName: "",
+            LastName:"",
         }
     }
     componentDidMount()
     {
-        messaging().setBackgroundMessageHandler(async remoteMessage => {
-            console.log('Message handled in the background!', remoteMessage);
-          });
-          messaging().onNotificationOpenedApp(remoteMessage => {
-            console.log(
-              'Notification caused app to open from background state:',
-              remoteMessage.notification,
-            );
-          });
-      
-          // Check whether an initial notification is available
-          messaging()
-            .getInitialNotification()
-            .then(remoteMessage => {
-              if (remoteMessage) {
-                console.log(
-                  'Notification caused app to open from quit state:',
-                  remoteMessage.notification,
-                );
-              }
-            });
     }
     GetInfo= async ()=>{
     }
@@ -96,11 +77,27 @@ class SignIn extends Component{
             }
         });
     }
+    GenerateSubstrings=(Names)=>{
+        var UserSubstrings=[];
+        for(var j=0;j<Names[0].length;j++)
+        {
+            var k=5;
+            while(k<Names[0].length)
+            {
+            var Name=Names[0].substring(j,j+k);
+            UserSubstrings.push(Name);
+            k+=1;
+            }
+        }
+        UserSubstrings.push(Names[1]);
+        UserSubstrings.push(Names[2]);
+        return UserSubstrings;
+    }
     SignUp=()=>{
         NetInfo.fetch().then((state)=>{
             if(state.isConnected)
             {
-                if(this.state.usernameCreate!="" && this.state.passwordCreate!="" && this.state.displayName!="")
+                if(this.state.usernameCreate!="" && this.state.passwordCreate!="" && this.state.displayName!="" && this.state.FirstName!="" && this.state.LastName!="")
                 {
                     
                   auth().createUserWithEmailAndPassword(this.state.usernameCreate, this.state.passwordCreate).then(()=>{
@@ -108,11 +105,13 @@ class SignIn extends Component{
                       messaging().getToken().then(token=>{
                         firestore().collection('Users').add({
                             Email: this.state.usernameCreate,
-                            Username: this.state.displayName.charAt(0).toUpperCase()+this.state.displayName.slice(1,this.state.displayName.length),
+                            Username: this.state.displayName.toLowerCase(),
                             Number: "",
-                            Image: "https://firebasestorage.googleapis.com/v0/b/goout-eb557.appspot.com/o/8-512.png?alt=media&token=12bc098a-0310-462c-a73c-872c360eaf3f",
-                            NotificationToken: token
-                        });
+                            Image: "https://firebasestorage.googleapis.com/v0/b/goout-4391e.appspot.com/o/0c3b3adb1a7530892e55ef36d3be6cb8.png?alt=media&token=3a29d2dc-500c-4e0a-8564-04678a8d75d5",
+                            FirstName: this.state.FirstName.toLowerCase(),
+                            LastName: this.state.LastName.toLowerCase(),
+                            SearchArray: this.GenerateSubstrings([this.state.displayName.toLowerCase(),this.state.FirstName.toLowerCase(),this.state.LastName.toLowerCase()])
+                         });
                      })
                         this.setState({modalSignupVisible: false});
                     })
@@ -165,8 +164,25 @@ class SignIn extends Component{
     render()
     {
         return(
-            <KeyboardAvoidingView style={styles.View} behavior="height" enabled={true}>
-                <Modal
+            <View style={styles.View} behavior="height" enabled={true}>
+            <Image source={require('../static/a1695e7b-5875-4314-bf70-b50c4a0386f3_200x200.png') 
+            } style={styles.Image}/>
+            <View style={styles.TextContainer}>
+            <Text style={styles.Text1}>Have Fun</Text>
+            <Text style={styles.Text2}>Meet Friends</Text>
+            <Text style={styles.Text3}>Stay Safe</Text>
+            <TouchableOpacity style={styles.Button} onPress={()=>{
+                this.SetModalLoginVisible();
+            }}>
+                <Text style={styles.Text3}>Login</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.Button} onPress={()=>{
+                this.SetModalSignupVisible();
+            }}>
+                <Text style={styles.Text3}>Sign Up</Text>
+            </TouchableOpacity>
+            </View>
+            <Modal
         animationType="slide"
         transparent={true}
         visible={this.state.modalLoginVisible}
@@ -202,6 +218,12 @@ class SignIn extends Component{
       >
         <View style={styles.centeredView} >
           <View style={styles.modalView}>
+          <TextInput placeholder="First Name" style={styles.textinput} onChangeText={(value)=>{
+                this.setState({FirstName: value});
+            }}/>
+            <TextInput placeholder="Last Name" style={styles.textinput} onChangeText={(value)=>{
+                this.setState({LastName: value});
+            }}/>
           <TextInput placeholder="Username" style={styles.textinput} onChangeText={(value)=>{
                 this.setState({displayName: value});
             }}/>
@@ -215,24 +237,7 @@ class SignIn extends Component{
           </View>
         </View>
       </Modal>
-            <Image source={require('../static/a1695e7b-5875-4314-bf70-b50c4a0386f3_200x200.png') 
-            } style={styles.Image}/>
-            <View style={styles.TextContainer}>
-            <Text style={styles.Text1}>Have Fun</Text>
-            <Text style={styles.Text2}>Meet Friends</Text>
-            <Text style={styles.Text3}>Stay Safe</Text>
-            <TouchableOpacity style={styles.Button} onPress={()=>{
-                this.SetModalLoginVisible();
-            }}>
-                <Text style={styles.Text3}>Login</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.Button} onPress={()=>{
-                this.SetModalSignupVisible();
-            }}>
-                <Text style={styles.Text3}>Sign Up</Text>
-            </TouchableOpacity>
             </View>
-            </KeyboardAvoidingView>
         );
     }
 
@@ -287,7 +292,8 @@ const styles= StyleSheet.create({
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: '50%',
+        position: 'absolute',
+        alignSelf: 'center'
       },
       modalView: {
         backgroundColor: "white",
