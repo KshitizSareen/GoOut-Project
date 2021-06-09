@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import NetInfo from '@react-native-community/netinfo';
 import { View,StyleSheet,Text, Alert,Dimensions,TouchableOpacity, TextInput } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { FlatList, ScrollView } from 'react-native-gesture-handler';
 import firestore from '@react-native-firebase/firestore';
 import CheckBox from '@react-native-community/checkbox';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -21,9 +21,27 @@ class EventUsers extends Component{
             justifyContent: 'center',
             alignItems: 'center'
            }}>
-               <Text>Add User</Text>
+               <TouchableOpacity style={styles.AddUser} onPress={()=>{
+                   this.props.navigation.navigate("AddUser",{userid: this.props.userid,eventid: this.props.eventid});
+               }}>
+                   <Text>Add User</Text>
+               </TouchableOpacity>
+               <FlatList />
            </View>
         )
     }
 }
+
+const styles=StyleSheet.create({
+    AddUser:{
+        width:0.5*windowWidth,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'lightblue',
+        padding: '1%',
+        borderRadius: 10,
+        elevation: 5,
+        margin: '5%'
+    },
+})
 export default EventUsers;

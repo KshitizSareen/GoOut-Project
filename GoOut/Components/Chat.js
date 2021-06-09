@@ -127,9 +127,9 @@ class Chat extends Component{
             for (const res of results) {
                 console.log(res.uri);
                 const uriComponents = res.uri.split('/');
-                const destPath = `${RNFetchBlob.fs.dirs.DocumentDir}/${res.name}`;
+                const destPath = `${RNFetchBlob.fs.dirs.DocumentDir}/${this.props.userid}${res.name}`;
                 var FileObject={};
-                FileObject.FilePath=`${res.name}`;
+                FileObject.FilePath=`${this.props.userid}${res.name}`;
                 FileObject.DestPath="file://"+destPath;
                 FileObject.FileName=res.name;
                 console.log(destPath);

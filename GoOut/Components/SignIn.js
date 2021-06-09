@@ -100,9 +100,8 @@ class SignIn extends Component{
                 if(this.state.usernameCreate!="" && this.state.passwordCreate!="" && this.state.displayName!="" && this.state.FirstName!="" && this.state.LastName!="")
                 {
                     
-                  auth().createUserWithEmailAndPassword(this.state.usernameCreate, this.state.passwordCreate).then(()=>{
+                  auth().createUserWithEmailAndPassword(this.state.usernameCreate, this.state.passwordCreate).then((res)=>{
                       Alert.alert("","Sign Up Succesful");
-                      messaging().getToken().then(token=>{
                         firestore().collection('Users').add({
                             Email: this.state.usernameCreate,
                             Username: this.state.displayName.toLowerCase(),
@@ -110,9 +109,9 @@ class SignIn extends Component{
                             Image: "https://firebasestorage.googleapis.com/v0/b/goout-4391e.appspot.com/o/0c3b3adb1a7530892e55ef36d3be6cb8.png?alt=media&token=3a29d2dc-500c-4e0a-8564-04678a8d75d5",
                             FirstName: this.state.FirstName.toLowerCase(),
                             LastName: this.state.LastName.toLowerCase(),
-                            SearchArray: this.GenerateSubstrings([this.state.displayName.toLowerCase(),this.state.FirstName.toLowerCase(),this.state.LastName.toLowerCase()])
+                            SearchArray: this.GenerateSubstrings([this.state.displayName.toLowerCase(),this.state.FirstName.toLowerCase(),this.state.LastName.toLowerCase()]),
+                            userid: res.user.uid
                          });
-                     })
                         this.setState({modalSignupVisible: false});
                     })
                     .catch(error=>{

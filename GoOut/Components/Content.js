@@ -14,6 +14,8 @@ import ImagePicker from 'react-native-image-crop-picker';
 import FastImage from 'react-native-fast-image';
 import storage from '@react-native-firebase/storage';
 import EventUsers from './EventUsers.js';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faBook, faBookReader, faBug, faClipboardList, faComment, faImage, faInfo, faList, faTag, faTextHeight, faUser } from '@fortawesome/free-solid-svg-icons';
 class Content extends Component{
     constructor() {
         super();
@@ -218,22 +220,22 @@ class Content extends Component{
                     <TouchableOpacity style={styles.PanelFirstButton} onPress={()=>{
                         this.SetChat();
                     }}>
-                        <Text style={styles.PanelText}>Chat</Text>
+                        <FontAwesomeIcon icon={faComment} color="lightblue" size="40"/>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.PanelButton} onPress={()=>{
                         this.SetPhotos();
                     }}>
-                        <Text style={styles.PanelText}>Media</Text>
+                        <FontAwesomeIcon icon={faImage} color="lightblue" size="40"/>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.PanelButton} onPress={()=>{
                         this.SetInfo();
                     }}>
-                        <Text style={styles.PanelText}>Info</Text>
+                        <FontAwesomeIcon icon={faInfo} color="lightblue" size="40"/>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.PanelLastButton} onPress={()=>{
                         this.SetUsers();
                     }}>
-                        <Text style={styles.PanelText}>Members</Text>
+                        <FontAwesomeIcon icon={faUser} color="lightblue" size="40"/>
                     </TouchableOpacity>
                 </View>
                 {
@@ -304,6 +306,8 @@ const styles=StyleSheet.create({
         borderLeftWidth: 2,
         elevation: 5,
         width: 0.25*windowWidth,
+        justifyContent: 'center',
+        alignItems:'center'
     },
     PanelFirstButton:{
         backgroundColor: '#dce8e7',
@@ -312,6 +316,8 @@ const styles=StyleSheet.create({
         borderRightWidth: 2,
         elevation: 5,
         width: 0.25*windowWidth,
+        justifyContent: 'center',
+        alignItems:'center'
     },
     PanelLastButton:{
         backgroundColor: '#dce8e7',
@@ -320,11 +326,8 @@ const styles=StyleSheet.create({
         borderLeftWidth: 2,
         elevation: 5,
         width: 0.25*windowWidth,
-    },
-    PanelText:{
-        textAlign: 'center',
-        paddingTop: '10%',
-        fontSize: 21
+        justifyContent: 'center',
+        alignItems:'center'
     },
     ChatInput:{
         width: 300,
