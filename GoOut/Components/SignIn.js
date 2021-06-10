@@ -107,8 +107,8 @@ class SignIn extends Component{
                             Username: this.state.displayName.toLowerCase(),
                             Number: "",
                             Image: "https://firebasestorage.googleapis.com/v0/b/goout-4391e.appspot.com/o/0c3b3adb1a7530892e55ef36d3be6cb8.png?alt=media&token=3a29d2dc-500c-4e0a-8564-04678a8d75d5",
-                            FirstName: this.state.FirstName.toLowerCase(),
-                            LastName: this.state.LastName.toLowerCase(),
+                            FirstName: this.state.FirstName.charAt(0).toUpperCase()+this.state.FirstName.slice(1),
+                            LastName: this.state.LastName.charAt(0).toUpperCase()+this.state.LastName.slice(1),
                             SearchArray: this.GenerateSubstrings([this.state.displayName.toLowerCase(),this.state.FirstName.toLowerCase(),this.state.LastName.toLowerCase()]),
                             userid: res.user.uid
                          });
