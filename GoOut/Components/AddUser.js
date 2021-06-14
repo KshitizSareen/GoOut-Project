@@ -12,6 +12,8 @@ const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 import FastImage from 'react-native-fast-image';
 import auth from '@react-native-firebase/auth';
+import messaging from '@react-native-firebase/messaging';
+const axios = require('axios').default ;
 class AddUser extends Component{
     constructor(){
         super()
@@ -30,6 +32,27 @@ class AddUser extends Component{
                 this.setState({Users: res.docs});
             })
         }
+    }
+    AddUser=(index)=>{
+        var User=this.state.Users[index];
+        console.log(User.data().NotificationToken);
+          axios.post("https://fcm.googleapis.com/fcm/send",{
+              "to" : User.data().NotificationToken,
+ "notification" : {
+     "body" : "Body of Your Notification",
+     "title": "Title of Your Notification"
+ },
+ "data":{
+
+ }
+},{
+              headers:{
+                Authorization: "key=AAAA7tNMKV0:APA91bEZHjBk7k1YayjyS_7HrM8rznxOyH-_1GHWH58hqyvmVMoBPMCCsQ23G-9W16gJhh2RyDVE4qSWn5y2QiX3MG39hv1javY_34IJNE5PpWdMKa-QHSXaXop8nxpZc5-VsP2OTzXd",
+                "Content-Type": "application/json"
+              },
+          }).then(res=>{
+              console.log(res.data);
+          })
     }
     render(){
         return(
@@ -71,6 +94,8 @@ class AddUser extends Component{
                             <TouchableOpacity style={{
                                 justifyContent: 'center',
                                 alignItems: 'center'
+                            }} onPress={()=>{
+                                this.AddUser(data.index);
                             }}>
                                 <FontAwesomeIcon icon={faPlus} size="20"/>
                             </TouchableOpacity>

@@ -223,6 +223,7 @@ class EventCreate extends Component{
           )
         }
           return(
+            <ScrollView showsVerticalScrollIndicator={false}>
               <View style={styleevent.centeredView}>
                 {
                   ShowDateTimeModal()
@@ -230,7 +231,6 @@ class EventCreate extends Component{
                 {
                   ShowTagModel()
                 }
-                  <ScrollView showsVerticalScrollIndicator={false}>
                   <TextInput scrollEnabled={true} placeholder="Name" placeholderTextColor="grey" style={styleevent.EventName} value={this.state.Name} onChangeText={(value)=>{
                     this.SetName(value);
                   }}/>
@@ -285,7 +285,8 @@ class EventCreate extends Component{
                   }}>
                     <Text style={styleevent.Text3}>Create Event</Text>
                   </TouchableOpacity>
-                  </ScrollView></View>
+                  </View>
+                  </ScrollView>
   
           );
       }

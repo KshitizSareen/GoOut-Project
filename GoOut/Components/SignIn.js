@@ -31,6 +31,25 @@ class SignIn extends Component{
     }
     componentDidMount()
     {
+        messaging().onNotificationOpenedApp(remoteMessage=>{
+            console.log(
+              'Notification caused app to open from background state:',
+              remoteMessage.notification.body,
+            );
+          })
+          messaging()
+        .getInitialNotification()
+        .then(remoteMessage => {
+          if (remoteMessage) {
+            console.log(
+              'Notification caused app to open from quit state:',
+              remoteMessage.notification.body,
+            );
+            console.log(remoteMessage.data);
+          }
+        }).catch(err=>{
+            console.log(err);
+        });
     }
     GetInfo= async ()=>{
     }

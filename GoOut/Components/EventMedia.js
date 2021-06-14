@@ -136,7 +136,7 @@ class EventMedia extends Component{
                   alignItems: 'center',
                   justifyContent: 'center',
               }}>
-                  <FlatList  data={this.state.Media} initialNumToRender={3} style={{
+                  <FlatList nestedScrollEnabled={true}  data={this.state.Media} initialNumToRender={3} style={{
                       width: 0.98*windowWidth,
                       paddingTop: '1%'
                   }} numColumns={3} renderItem={(data)=>{
