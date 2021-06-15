@@ -36,7 +36,7 @@ class AddUser extends Component{
     AddUser=(index)=>{
         var User=this.state.Users[index];
         console.log(User.data().NotificationToken);
-          axios.post("https://fcm.googleapis.com/fcm/send",{
+         axios.post("https://fcm.googleapis.com/fcm/send",{
               "to" : User.data().NotificationToken,
  "notification" : {
      "body" : "Body of Your Notification",
@@ -51,10 +51,63 @@ class AddUser extends Component{
                 "Content-Type": "application/json"
               },
           }).then(res=>{
-              console.log(res.data);
+              firestore().collection('Users').doc(User.id).get().then(user=>{
+                  var InvitedEvents=[];
+                  if(user.InvitedBy!=null)
+                  {
+                      InvitedEvents=user.InvitedBy;
+                  }
+                  InvitedEvents.push(this.props.route.params.eventid);
+                  firestore().collection('Users').doc(User.id).update({
+                      InvitedBy: InvitedEvents
+                  }).then(()=>{
+                      this.SearchUsers(this.state.Username);
+                  })
+              })
           })
     }
+    RemoveUser=(index)=>{
+        var User=this.state.Users[index];
+        firestore().collection('Users').doc(User.id).get().then(user=>{
+            var InvitedEvents=[];
+            if(user.InvitedBy!=null)
+            {
+                InvitedEvents=user.InvitedBy;
+            }
+            var eventIndex=InvitedEvents.indexOf(this.props.route.params.eventid);
+            InvitedEvents.splice(eventIndex,1);
+            firestore().collection('Users').doc(User.id).update({
+                InvitedBy: InvitedEvents
+            }).then(()=>{
+                this.SearchUsers(this.state.Username);
+            })
+        })
+    }
     render(){
+        var ShowAdd=(index)=>{
+            return(
+                <TouchableOpacity style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                }} onPress={()=>{
+                    this.AddUser(index);
+                }}>
+                    <FontAwesomeIcon icon={faPlus} size="20"/>
+                </TouchableOpacity>
+            )
+        }
+        var ShowRemove=(index)=>{
+            return(
+                <TouchableOpacity style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                }} onPress={()=>{
+                    this.RemoveUser(index);
+                }}>
+                    <FontAwesomeIcon icon={faMinus} size="20"/>
+                </TouchableOpacity>
+            )
+        }
         return(
             <View style={styles.background}>
                 <TextInput style={styles.searchbar} placeholder="Search Users" value={this.state.Username} placeholderTextColor="black" onChange={(value)=>{
@@ -86,19 +139,14 @@ class AddUser extends Component{
                                     uri: data.item.data().Image,
                                     priority: FastImage.priority.high
                                 }}/>
-                                <View>
+                            <View>
                             <Text style={{color: 'black',fontSize: 22}}>{data.item.data().Username}</Text>
                             <Text style={{color: 'black',fontSize: 22}}>{data.item.data().FirstName+" "+data.item.data().LastName}</Text>
                             </View>
                             </View>
-                            <TouchableOpacity style={{
-                                justifyContent: 'center',
-                                alignItems: 'center'
-                            }} onPress={()=>{
-                                this.AddUser(data.index);
-                            }}>
-                                <FontAwesomeIcon icon={faPlus} size="20"/>
-                            </TouchableOpacity>
+                            {
+                                data.item.data().InvitedBy!=null && data.item.data().InvitedBy.includes(this.props.route.params.eventid) ? ShowRemove(data.index) : ShowAdd(data.index)
+                            }
                             </View>
                     )
                 }}/>

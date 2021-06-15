@@ -34,7 +34,6 @@ import EventInfo from './Components/EventInfo';
 import EventUsers from './Components/EventUsers';
 import AddUser from './Components/AddUser';
 const Stack=createStackNavigator();
-
 class App extends Component{
   render()
   {

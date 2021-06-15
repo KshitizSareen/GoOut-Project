@@ -60,7 +60,7 @@ class SignIn extends Component{
                 if(this.state.username!=""  && this.state.password!="")
                 {
                     var docid="";
-                  auth().signInWithEmailAndPassword(this.state.username, this.state.password).then(()=>{
+                  auth().signInWithEmailAndPassword(this.state.username, this.state.password).then((user)=>{
                         this.setState({modalLoginVisible: false});
                         Alert.alert("","Login Succesful");
                     }).then(()=>{
