@@ -38,7 +38,8 @@ class Content extends Component{
             ShowLoadingAnimation: false,
             ShowIndicator: false,
             ImageUri: "https://firebasestorage.googleapis.com/v0/b/goout-4391e.appspot.com/o/a1695e7b-5875-4314-bf70-b50c4a0386f3_200x200.png?alt=media&token=8c962cb0-02e9-4f51-bec2-e2699cebcfac",
-            Users: false
+            Users: false,
+            Ownername: ""
         };
       }
     componentDidMount(){
@@ -55,18 +56,30 @@ class Content extends Component{
                         this.setState({Price:doc.data().Price});
                         this.setState({Date: doc.data().Date});
                         this.setState({ImageUri: doc.data().ImageUri});
+                        this.GetOwner(doc.data().Owner);
                     }
                 });
                 this.SetChat();
-                messaging().onMessage(msg=>{
-                    console.log(msg.data);
-                })
             }
             else{
                 Alert.alert("","Please connect to the internet")
             }
         })
 
+    }
+
+    GetOwner=(OnwerID)=>{
+        NetInfo.fetch().then(state=>{
+            if(state.isConnected)
+            {
+                firestore().collection('Users').doc(OnwerID).get().then(doc=>{
+                    if(doc.exists)
+                    {
+                        this.setState({Ownername: doc.data().Username});
+                    }
+                })
+            }
+        })
     }
 
     SelectImage=()=>{
@@ -192,7 +205,7 @@ class Content extends Component{
         if(this.state.Users)
         {
            return(
-               <EventUsers userid={this.props.route.params.userid} eventid={this.props.route.params.eventid} navigation={this.props.navigation} ShowAnimation={this.ShowAnimation}/>
+               <EventUsers userid={this.props.route.params.userid} eventid={this.props.route.params.eventid} navigation={this.props.navigation} ShowAnimation={this.ShowAnimation} OwnerName={this.state.Ownername} EventName={this.state.Name} EventImage={this.state.ImageUri}/>
            );
         }
     }   

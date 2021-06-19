@@ -32,7 +32,6 @@ import EventMedia from './Components/EventMedia';
 import LoadMedia from './Components/LoadMedia';
 import EventInfo from './Components/EventInfo';
 import EventUsers from './Components/EventUsers';
-import AddUser from './Components/AddUser';
 const Stack=createStackNavigator();
 class App extends Component{
   render()
@@ -136,13 +135,6 @@ class App extends Component{
             <Stack.Screen
             name="EventUsers"
             component={EventUsers}
-            options={{
-              title: 'Welcome',
-              headerStyle: {backgroundColor: '#F0f0f7'},
-            }}/>
-            <Stack.Screen
-            name="AddUser"
-            component={AddUser}
             options={{
               title: 'Welcome',
               headerStyle: {backgroundColor: '#F0f0f7'},

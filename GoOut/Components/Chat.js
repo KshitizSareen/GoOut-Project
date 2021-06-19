@@ -46,9 +46,8 @@ class Chat extends Component{
                 this.setState({User: User});
             }
         })
-        messaging().onMessage(msg=>{
-            console.log(msg.notification.title);
-            this.GetMessages();
+        messaging().onMessage( async msg=>{
+            //this.GetMessages();
         })
     }
     SendMessage=(type)=>{

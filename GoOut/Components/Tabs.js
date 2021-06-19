@@ -1,12 +1,14 @@
 import React, {Component} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {faList,  faUser} from '@fortawesome/free-solid-svg-icons';
+import {faEnvelope, faList,  faMap,  faUser} from '@fortawesome/free-solid-svg-icons';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Events from './EventsList';
 import Info from './Info';
 import messaging from '@react-native-firebase/messaging';
 import NetInfo from '@react-native-community/netinfo';
 import firestore  from '@react-native-firebase/firestore';
+import CheckInvites from './CheckInvites';
+import MyEvents from './MyEvents';
 const Tab=createBottomTabNavigator();
   class Tabs extends Component{
       componentDidMount(){
@@ -61,6 +63,30 @@ const Tab=createBottomTabNavigator();
                   }}
                   initialParams={{
                     userid: this.props.route.params.userid
+                }}/>
+                <Tab.Screen
+                  name="Check Invites"
+                  component={CheckInvites}
+                  options={{
+                      tabBarLabel: 'Invites',
+                      tabBarIcon: ()=>(
+                          <FontAwesomeIcon icon={faEnvelope} color="grey" size="28"/>
+                      ),
+                  }}
+                  initialParams={{
+                    UserID: this.props.route.params.userid
+                }}/>
+                <Tab.Screen
+                  name="Check Events"
+                  component={MyEvents}
+                  options={{
+                      tabBarLabel: 'Events',
+                      tabBarIcon: ()=>(
+                          <FontAwesomeIcon icon={faMap} color="grey" size="28"/>
+                      ),
+                  }}
+                  initialParams={{
+                    UserID: this.props.route.params.userid
                 }}/>
               </Tab.Navigator>
           )

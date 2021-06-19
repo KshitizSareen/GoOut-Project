@@ -160,7 +160,7 @@ class Events extends Component{
           <FlatList data={this.state.Events} renderItem={(event)=>{
               return(
                   <TouchableOpacity style={styleevent.EventContainer} onPress={()=>{
-                      this.props.navigation.navigate("Content",{userid: this.userid,eventid:event.item.id });
+                      this.props.navigation.navigate("Content",{userid: this.userid,eventid:event.item.id,EventName: event.item.data.Name });
                   }} ><Text style={styleevent.title}>{event.item.data.Name}</Text>
                     <Image style={styleevent.Image} source={
                         {
