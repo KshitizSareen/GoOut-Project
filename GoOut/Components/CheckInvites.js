@@ -19,8 +19,8 @@ class CheckInvites extends Component{
         super();
         this.state={
             Invites:[],
-            UserName:"",
-            DisplayPic:""
+            Images:[],
+            EventNames:[],
         }
     }
     componentDidMount(){
@@ -31,30 +31,39 @@ class CheckInvites extends Component{
             this.FetchInvites();
         })
     }
+
+    GetExternalData=()=>{
+        for(var i=0;i<this.state.Invites.length;i++)
+        {
+            var EventID=this.state.Invites[i];
+        firestore().collection('Events').doc(EventID).get().then(doc=>{
+            var Images=this.state.Images;
+            Images.push(doc.data().ImageUri);
+            this.setState({Images: Images});
+            var EventNames=this.state.EventNames;
+            EventNames.push(doc.data().Name);
+            this.setState({EventNames: EventNames});
+        })
+    }
+    }
+
     FetchInvites=()=>{
         firestore().collection('Users').doc(this.props.route.params.UserID).get().then(doc=>{
-            console.log(doc.data());
             if(doc.data().InvitedBy!=null)
             {
                 this.setState({Invites: doc.data().InvitedBy});
             }
-            this.setState({UserName:doc.data().Username});
-            this.setState({DisplayPic: doc.data().Image});
-        })
+            this.GetExternalData();
+        });
     }
     AddUser=(Invite,index)=>{
-        firestore().collection('Events').doc(Invite.EventID).get().then(Event=>{
+        firestore().collection('Events').doc(Invite).get().then(Event=>{
             var Members=[];
             if(Event.data().Members!=null)
             {
                 Members=Event.data().Members;
             }
-            Members.push(
-                {
-                    UserID: this.props.route.params.UserID,
-                    UserDP: this.state.DisplayPic,
-                    UserName: this.state.UserName
-                }
+            Members.push( this.props.route.params.UserID
             );
             var Invites=[];
             if(Event.data().Invites!=null)
@@ -64,14 +73,14 @@ class CheckInvites extends Component{
             var UserIndex;
             for(var i=0;i<Invites.length;i++)
             {
-                if(Invites[i].UserID==this.props.route.params.UserID)
+                if(Invites[i]==this.props.route.params.UserID)
                 {
                     UserIndex=i;
                     break;
                 }
             }
             Invites.splice(UserIndex,1);
-            firestore().collection('Events').doc(Invite.EventID).update({
+            firestore().collection('Events').doc(Invite).update({
                 Members: Members,
                 Invites: Invites
             })
@@ -81,11 +90,8 @@ class CheckInvites extends Component{
                 {
                     MembersOf=User.data().MembersOf;
                 }
-                MembersOf.push({
-                    EventName: Event.data().Name,
-                    EventUri: Event.data().ImageUri,
-                    EventID: Invite.EventID
-                })
+                MembersOf.push(
+                Invite)
                 var InvitedBy=this.state.Invites;
                 InvitedBy.splice(index,1);
                 firestore().collection('Users').doc(this.props.route.params.UserID).update({
@@ -98,7 +104,7 @@ class CheckInvites extends Component{
     }
     RemoveUser=(index)=>{
         var InvitedBy=this.state.Invites;
-                firestore().collection('Events').doc(InvitedBy[index].EventID).get().then(doc=>{
+                firestore().collection('Events').doc(InvitedBy[index]).get().then(doc=>{
                     var Invites=[];
                     if(doc.data().Invites!=null)
                     {
@@ -107,7 +113,7 @@ class CheckInvites extends Component{
                     var Userindex;
                     for(var i=0;i,Invites.length;i++)
                     {
-                        if(Invites[i].UserID==this.props.route.params.UserID)
+                        if(Invites[i]==this.props.route.params.UserID)
                         {
                             Userindex=i;
                             break;
@@ -129,7 +135,6 @@ class CheckInvites extends Component{
         var ShowInvites=()=>{
             return(
                 <FlatList style={{marginTop: '2%'}} data={this.state.Invites} renderItem={(data)=>{
-                    console.log(data.item);
                     return(
                         <View style={{
                             alignItems: 'center',
@@ -142,7 +147,7 @@ class CheckInvites extends Component{
                             
                         }}>
                             <FastImage source={{
-                                uri: data.item.EventDP,
+                                uri: this.state.Images[data.index],
                                 priority: FastImage.priority.high,
                             }} style={{
                                 width: 0.1*windowWidth,
@@ -150,7 +155,7 @@ class CheckInvites extends Component{
                                 borderRadius: 50,
                                 margin: '1%'
                             }}/>
-                            <Text style={{fontSize: 15,width: 0.55*windowWidth,alignSelf: 'center'}}>{data.item.OwnerName+" has invited you to "+data.item.EventName}</Text>
+                            <Text style={{fontSize: 15,width: 0.55*windowWidth,alignSelf: 'center'}}>{"You have been invited to "+this.state.EventNames[data.index]}</Text>
                             <View style={{
                                 flexDirection: 'row',
                                 width: 0.3*windowWidth,

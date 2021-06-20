@@ -15,7 +15,8 @@ import FastImage from 'react-native-fast-image';
 import storage from '@react-native-firebase/storage';
 import EventUsers from './EventUsers.js';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faBook, faBookReader, faBug, faClipboardList, faComment, faImage, faInfo, faList, faTag, faTextHeight, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faBook, faBookReader, faBug, faClipboardList, faComment, faImage, faInfo, faList, faSignInAlt, faSignOutAlt, faTag, faTextHeight, faUser, faUserCircle, faUserFriends, faWindowClose } from '@fortawesome/free-solid-svg-icons';
+import EventRequests from './EventRequests.js';
 class Content extends Component{
     constructor() {
         super();
@@ -39,7 +40,12 @@ class Content extends Component{
             ShowIndicator: false,
             ImageUri: "https://firebasestorage.googleapis.com/v0/b/goout-4391e.appspot.com/o/a1695e7b-5875-4314-bf70-b50c4a0386f3_200x200.png?alt=media&token=8c962cb0-02e9-4f51-bec2-e2699cebcfac",
             Users: false,
-            Ownername: ""
+            Ownername: "",
+            NoOfMembers:0,
+            NoOfInvites:0,
+            Members:[],
+            OwnerID:"",
+            UserRequests:false
         };
       }
     componentDidMount(){
@@ -57,6 +63,15 @@ class Content extends Component{
                         this.setState({Date: doc.data().Date});
                         this.setState({ImageUri: doc.data().ImageUri});
                         this.GetOwner(doc.data().Owner);
+                        this.setState({OwnerID: doc.data().Owner});
+                        if(doc.data().Members!=null)
+                        {
+                            this.setState({NoOfMembers: doc.data().Members.length});
+                        }
+                        if(doc.data().Invites!=null)
+                        {
+                            this.setState({NoOfInvites: doc.data().Invites.length});
+                        }
                     }
                 });
                 this.SetChat();
@@ -115,30 +130,66 @@ class Content extends Component{
         this.setState({Photos:false});
         this.setState({Info: false});
         this.setState({Users: false});
+        this.setState({UserRequests: false});
     }
     SetPhotos=()=>{
         this.setState({Chat:false});
         this.setState({Photos:true});
         this.setState({Info: false});
         this.setState({Users: false});
+        this.setState({UserRequests: false});
     }
     SetUsers=()=>{
         this.setState({Chat:false});
         this.setState({Photos:false});
         this.setState({Info: false});
         this.setState({Users: true});
+        this.setState({UserRequests: false});
     }
     SetInfo=()=>{
         this.setState({Chat:false});
         this.setState({Photos:false});
         this.setState({Info: true});
         this.setState({Users: false});
+        this.setState({UserRequests: false});
+    }
+    SetUserRequests=()=>{
+        this.setState({Chat:false});
+        this.setState({Photos:false});
+        this.setState({Info: false});
+        this.setState({Users: false});
+        this.setState({UserRequests: true});
     }
     ShowAnimation=(value)=>{
         this.setState({ShowLoadingAnimation: value});
     }
     HandleBackButton(){
         return true;
+    }
+    EnterEvent=()=>{
+        firestore().collection('Users').doc(this.props.route.params.userid).get().then(doc=>{
+            var UserRequests=[];
+            console.log(UserRequests);
+            if(doc.data().UserRequests!=null)
+            {
+                UserRequests=doc.data().UserRequests;
+            }
+            UserRequests.push(this.props.route.params.eventid);
+            firestore().collection('Users').doc(this.props.route.params.userid).update({
+                UserRequests: UserRequests
+            })
+        })
+        firestore().collection('Events').doc(this.props.route.params.eventid).get().then(doc=>{
+            var EventRequests=[]
+            if(doc.data().EventRequests!=null)
+            {
+                EventRequests=doc.data().EventRequests;
+            }
+            EventRequests.push(this.props.route.params.userid)
+            firestore().collection('Events').doc(this.props.route.params.eventid).update({
+                EventRequests: EventRequests
+            })
+        })
     }
                 
     componentWillUnmount(){
@@ -171,10 +222,10 @@ class Content extends Component{
      var ShowPice=()=>{
          if(this.state.Price!=0)
          {
-         return <Text style={styles.TextDetails}>{this.state.Price}</Text>
+         return <Text style={styles.TextDetails}>{"Price - "+this.state.Price}</Text>
          }
          else{
-             return <Text style={styles.TextDetails}>Free</Text>
+             return <Text style={styles.TextDetails}>Price - Free</Text>
          }
      }
      var DisplayChat=()=>{
@@ -208,6 +259,14 @@ class Content extends Component{
                <EventUsers userid={this.props.route.params.userid} eventid={this.props.route.params.eventid} navigation={this.props.navigation} ShowAnimation={this.ShowAnimation} OwnerName={this.state.Ownername} EventName={this.state.Name} EventImage={this.state.ImageUri}/>
            );
         }
+    }
+    var DisplayEventRequests=()=>{
+        if(this.state.UserRequests)
+        {
+            return(
+                <EventRequests userid={this.props.route.params.userid} eventid={this.props.route.params.eventid} navigation={this.props.navigation}/>
+            )
+        }
     }   
         return(
             <View style={styles.Background}>
@@ -215,12 +274,59 @@ class Content extends Component{
                 ShowLoadingAnimation()
                 }
                 <View style={styles.Description}>
+                    <View style={{
+                        width: 0.5*windowWidth,
+                        justifyContent: 'space-evenly',
+                        alignItems: 'center',
+                        height: 0.25*windowHeight,
+                    }}>
                     <TouchableOpacity onPress={()=>{
                         this.SelectImage();
                 }}><FastImage source={{
                     uri: this.state.ImageUri,
                     priority: FastImage.priority.low
                 }} style={styles.Image} /></TouchableOpacity>
+                <View style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-evenly',
+                    width: 0.5*windowWidth
+                }}>
+                    <TouchableOpacity style={{
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }} onPress={()=>{
+                        this.props.navigation.navigate("ShowMembers",{EventID: this.props.route.params.eventid});
+                    }}>
+                        <Text style={{
+                            fontSize: 20
+                        }}>{this.state.NoOfMembers}</Text>
+                    <Text style={{
+                            fontSize: 13
+                        }}>Members</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }} onPress={()=>{
+                        this.props.navigation.navigate("ShowInvites",{EventID: this.props.route.params.eventid});
+                    }}>
+                        <Text style={{
+                            fontSize: 20
+                        }}>{this.state.NoOfInvites}</Text>
+                    <Text style={{
+                            fontSize: 13
+                        }}>Invites</Text>
+                    </TouchableOpacity>
+                </View>
+                {
+                    this.state.OwnerID!=this.props.route.params.userid ? 
+                    <TouchableOpacity onPress={()=>{
+    this.EnterEvent();
+}}>
+    <FontAwesomeIcon icon={faSignInAlt} size="30" color="lightblue"/>
+</TouchableOpacity> : null
+    }
+                </View>
                     <View style={styles.TextContainer}> 
             <Text style={styles.TextDetails}>{this.state.Date}</Text>
             <Text style={styles.TextDetails}>{this.state.Time}</Text>
@@ -245,10 +351,15 @@ class Content extends Component{
                     }}>
                         <FontAwesomeIcon icon={faInfo} color="lightblue" size="40"/>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.PanelLastButton} onPress={()=>{
+                    <TouchableOpacity style={styles.PanelButton} onPress={()=>{
                         this.SetUsers();
                     }}>
-                        <FontAwesomeIcon icon={faUser} color="lightblue" size="40"/>
+                        <FontAwesomeIcon icon={faUserCircle} color="lightblue" size="40"/>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.PanelLastButton} onPress={()=>{
+                        this.SetUserRequests();
+                    }}>
+                        <FontAwesomeIcon icon={faUserFriends} color="lightblue" size="40"/>
                     </TouchableOpacity>
                 </View>
                 {
@@ -262,6 +373,9 @@ class Content extends Component{
                 }
                 {
                     DisplayUsers()
+                }
+                {
+                    DisplayEventRequests()
                 }
             </View>
         )
@@ -278,28 +392,28 @@ const styles=StyleSheet.create({
     },
     Description:{
         flexDirection :'row',
-        justifyContent: 'space-between',
-        margin: '5%',
+        justifyContent: 'space-evenly',
+        alignItems: 'center',
+        height: 0.25*windowHeight,
+        width: windowWidth
     },
     Image:{
-        width: 0.4*windowWidth,
-        height: 0.2*windowHeight,
-        borderRadius: 5,
-        marginRight: '2.5%'
+        width: 0.2*windowWidth,
+        height: 0.2*windowWidth,
+        borderRadius: 50,
+        marginRight: '2.5%',
     },
     TextContainer:
     {
-        justifyContent: 'space-between',
+        justifyContent: 'space-evenly',
         alignItems: 'center',
         flexDirection: 'column',
-        marginLeft: '2.5%'
+        height: 0.25*windowHeight,
+        width: 0.5*windowWidth
     },
     TextDetails:{
         fontSize: 20,
-        backgroundColor: '#dce8e7',
-        padding: '0.5%',
         textAlign: 'center',
-        elevation: 5,
         borderRadius: 10,
         width: 0.4*windowWidth
 
@@ -308,39 +422,30 @@ const styles=StyleSheet.create({
         flexDirection: 'row',
         height: 50,
         justifyContent: 'space-between',
-        backgroundColor: 'lightblue',
-        alignItems: 'stretch'
+        backgroundColor: '#dce8e7',
+        width: windowWidth,
+        elevation: 5,
     },
     PanelButton:{
         backgroundColor: '#dce8e7',
         height: 50,
-        borderRightColor: 'black',
-        borderRightWidth: 2,
-        borderLeftWidth: 2,
-        elevation: 5,
-        width: 0.25*windowWidth,
         justifyContent: 'center',
-        alignItems:'center'
+        alignItems:'center',
+        width: 0.2*windowWidth
     },
     PanelFirstButton:{
         backgroundColor: '#dce8e7',
         height: 50,
-        borderRightColor: 'black',
-        borderRightWidth: 2,
-        elevation: 5,
-        width: 0.25*windowWidth,
         justifyContent: 'center',
-        alignItems:'center'
+        alignItems:'center',
+        width: 0.2*windowWidth
     },
     PanelLastButton:{
         backgroundColor: '#dce8e7',
         height: 50,
-        borderLeftColor: 'black',
-        borderLeftWidth: 2,
-        elevation: 5,
-        width: 0.25*windowWidth,
         justifyContent: 'center',
-        alignItems:'center'
+        alignItems:'center',
+        width: 0.2*windowWidth
     },
     ChatInput:{
         width: 300,

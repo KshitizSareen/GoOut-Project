@@ -41,10 +41,7 @@ class EventUsers extends Component{
                   {
                       InvitedEvents=User.data().InvitedBy;
                   }
-                  InvitedEvents.push({OwnerName:this.props.OwnerName,
-                      EventID:this.props.eventid,
-                    EventName: this.props.EventName,
-                     EventDP:  this.props.EventImage});
+                  InvitedEvents.push(this.props.eventid);
                   firestore().collection('Users').doc(User.id).update({
                       InvitedBy: InvitedEvents
                   }).then(()=>{
@@ -57,11 +54,7 @@ class EventUsers extends Component{
                           {
                               Invites=Event.data().Invites;
                           }
-                          Invites.push({
-                              UserName: User.data().Username,
-                              UserID: User.id,
-                              UserDP: User.data().Image
-                          })
+                          Invites.push(User.id);
                           firestore().collection('Events').doc(this.props.eventid).update({
                               Invites: Invites
                           })
@@ -70,7 +63,7 @@ class EventUsers extends Component{
                     axios.post("https://fcm.googleapis.com/fcm/send",{
                         "to" : User.data().NotificationToken,
            "notification" : {
-               "body" : this.props.OwnerName+" has invited you to "+this.props.EventName+"\n"+"Check your app for invites",
+               "body" : "You have been invited to "+this.props.EventName+"\n"+"Check your app for invites",
                "title": "Event Invite"
            },
            "data":{
@@ -95,7 +88,7 @@ class EventUsers extends Component{
                 var eventIndex;
                 for(var i=0;i<InvitedEvents.length;i++)
                 {
-                    if(InvitedEvents[i].EventID==this.props.eventid)
+                    if(InvitedEvents[i]==this.props.eventid)
                     {
                         eventIndex=i;
                         break;
@@ -116,7 +109,7 @@ class EventUsers extends Component{
                         var UserIndex;
                         for(var i=0;i<Invites.length;i++)
                 {
-                    if(Invites[i].UserID==User.id)
+                    if(Invites[i]==User.id)
                     {
                         UserIndex=i;
                         break;
@@ -204,7 +197,7 @@ class EventUsers extends Component{
                             </View>
                             </View>
                             {
-                                data.item.data().InvitedBy!=null && data.item.data().InvitedBy.some(Event=>Event.EventID == this.props.eventid) ? ShowRemove(data.index) : ShowAdd(data.item,data.index)
+                                data.item.data().InvitedBy!=null && data.item.data().InvitedBy.includes(this.props.eventid) ? ShowRemove(data.index) : ShowAdd(data.item,data.index)
                             }
                             </View>
                     )
