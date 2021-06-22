@@ -14,52 +14,46 @@ import FastImage from 'react-native-fast-image';
 import auth from '@react-native-firebase/auth';
 import messaging from '@react-native-firebase/messaging';
 
-class EventRequests extends Component{
+class UserRequests extends Component{
     constructor(){
         super();
         this.state={
             Requests:[],
             Images:[],
-            UserNames:[]
+            EventNames:[]
         }
     }
     componentDidMount(){
-        this.GetEventRequests();
+        this.GetUserRequests();
 
     }
-    GetEventRequests=()=>{
-        firestore().collection('Events').doc(this.props.eventid).get().then(Event=>{
-            var EventRequests=[];
-            if(Event.data().EventRequests!=null)
+    GetUserRequests=()=>{
+        firestore().collection('Users').doc(this.props.route.params.UserID).get().then(User=>{
+            var UserRequests=[];
+            if(User.data().UserRequests!=null)
             {
-                EventRequests=Event.data().EventRequests;
+                UserRequests=User.data().UserRequests;
             }
-            this.setState({Requests: EventRequests});
+            this.setState({Requests: UserRequests});
             this.GetExternalData();
         })
     }
     GetExternalData=()=>{
         for(var i=0;i<this.state.Requests.length;i++)
         {
-            var UserID=this.state.Requests[i];
-        firestore().collection('Users').doc(UserID).get().then(doc=>{
+            var EventID=this.state.Requests[i];
+        firestore().collection('Events').doc(EventID).get().then(doc=>{
             var Images=this.state.Images;
-            Images.push(doc.data().Image);
+            Images.push(doc.data().ImageUri);
             this.setState({Images: Images});
-            var UserNames=this.state.UserNames;
-            UserNames.push(doc.data().Username);
-            this.setState({UserNames: UserNames});
+            var EventNames=this.state.EventNames;
+            EventNames.push(doc.data().Name);
+            this.setState({EventNames: EventNames});
         })
     }
     }
-    AddUser=(User)=>{
-        firestore().collection('Users').doc(User).get().then(doc=>{
-            var MembersOf=[];
-            if(doc.data().MembersOf!=null)
-            {
-                MembersOf=doc.data().MembersOf;
-            }
-            MembersOf.push(this.props.eventid);
+    RemoveUser=(Event)=>{
+        firestore().collection('Users').doc(this.props.route.params.UserID).get().then(doc=>{
             var UserRequests=[];
             if(doc.data().UserRequests!=null)
             {
@@ -68,89 +62,37 @@ class EventRequests extends Component{
             var EventIndex;
             for(var i=0;i<UserRequests.length;i++)
             {
-                if(UserRequests[i]==this.props.eventid)
+                if(UserRequests[i]==Event)
                 {
                     EventIndex=i;
                     UserRequests.splice(EventIndex,1);
                     break;
                 }
             }
-            firestore().collection('Users').doc(User).update({
-                MembersOf: MembersOf,
+            firestore().collection('Users').doc(this.props.route.params.UserID).update({
                 UserRequests: UserRequests
             })
+            this.setState({Requests: UserRequests});
         })
-        firestore().collection('Events').doc(this.props.eventid).get().then(Event=>{
-            var Members=[];
-            if(Event.data().Members!=null)
-            {
-                Members=Event.data().Members;
-            }
-            Members.push(User);
+        firestore().collection('Events').doc(Event).get().then(doc=>{
             var EventRequests=[];
-            if(Event.data().EventRequests!=null)
+            if(doc.data().EventRequests!=null)
             {
-                EventRequests=Event.data().EventRequests;
+                EventRequests=doc.data().EventRequests;
             }
             var UserIndex;
             for(var i=0;i<EventRequests.length;i++)
             {
-                if(EventRequests[i]==User)
+                if(EventRequests[i]==this.props.route.params.UserID)
                 {
                     UserIndex=i;
                     EventRequests.splice(UserIndex,1);
                     break;
                 }
             }
-            firestore().collection('Events').doc(this.props.eventid).update({
-                Members: Members,
+            firestore().collection('Events').doc(Event).update({
                 EventRequests: EventRequests
             })
-            this.setState({Requests: EventRequests});
-        })
-
-    }
-    RemoveUser=(User)=>{
-        firestore().collection('Users').doc(User).get().then(doc=>{
-            var UserRequests=[];
-            if(doc.data().UserRequests!=null)
-            {
-                UserRequests=doc.data().UserRequests;
-            }
-            var EventIndex;
-            for(var i=0;i<UserRequests.length;i++)
-            {
-                if(UserRequests[i]==this.props.eventid)
-                {
-                    EventIndex=i;
-                    UserRequests.splice(EventIndex,1);
-                    break;
-                }
-            }
-            firestore().collection('Users').doc(User).update({
-                UserRequests: UserRequests
-            })
-        })
-        firestore().collection('Events').doc(this.props.eventid).get().then(Event=>{
-            var EventRequests=[];
-            if(Event.data().EventRequests!=null)
-            {
-                EventRequests=Event.data().EventRequests;
-            }
-            var UserIndex;
-            for(var i=0;i<EventRequests.length;i++)
-            {
-                if(EventRequests[i]==User)
-                {
-                    UserIndex=i;
-                    EventRequests.splice(UserIndex,1);
-                    break;
-                }
-            }
-            firestore().collection('Events').doc(this.props.eventid).update({
-                EventRequests: EventRequests
-            })
-            this.setState({Requests: EventRequests});
         })
     }
 
@@ -178,18 +120,13 @@ class EventRequests extends Component{
                                 borderRadius: 50,
                                 margin: '1%'
                             }}/>
-                            <Text style={{fontSize: 15,width: 0.55*windowWidth,alignSelf: 'center'}}>{this.state.UserNames[data.index]+" has requested to join the event"}</Text>
+                            <Text style={{fontSize: 15,width: 0.55*windowWidth,alignSelf: 'center'}}>{"You hava requested  to join "+ this.state.EventNames[data.index]}</Text>
                             <View style={{
                                 flexDirection: 'row',
                                 width: 0.3*windowWidth,
                                 justifyContent: 'space-evenly',
                                 margin: '1%'
                             }}>
-                            <TouchableOpacity onPress={()=>{
-                                this.AddUser(data.item);
-                            }}>
-                                <FontAwesomeIcon icon={faCheck} size="20"/>
-                            </TouchableOpacity>
                             <TouchableOpacity onPress={()=>{
                                 this.RemoveUser(data.item);
                             }}>
@@ -231,4 +168,4 @@ class EventRequests extends Component{
         )
     }
 }
-export default EventRequests;
+export default UserRequests;

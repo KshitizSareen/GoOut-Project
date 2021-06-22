@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {faEnvelope, faList,  faMap,  faUser} from '@fortawesome/free-solid-svg-icons';
+import {faEnvelope, faEnvelopeOpenText, faInbox, faList,  faMap,  faUser} from '@fortawesome/free-solid-svg-icons';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Events from './EventsList';
 import Info from './Info';
@@ -9,6 +9,7 @@ import NetInfo from '@react-native-community/netinfo';
 import firestore  from '@react-native-firebase/firestore';
 import CheckInvites from './CheckInvites';
 import MyEvents from './MyEvents';
+import UserRequests from './UserRequests';
 const Tab=createBottomTabNavigator();
   class Tabs extends Component{
       componentDidMount(){
@@ -83,6 +84,18 @@ const Tab=createBottomTabNavigator();
                       tabBarLabel: 'Events',
                       tabBarIcon: ()=>(
                           <FontAwesomeIcon icon={faMap} color="grey" size="28"/>
+                      ),
+                  }}
+                  initialParams={{
+                    UserID: this.props.route.params.userid
+                }}/>
+                <Tab.Screen
+                  name="Check Requests"
+                  component={UserRequests}
+                  options={{
+                      tabBarLabel: 'Requests',
+                      tabBarIcon: ()=>(
+                          <FontAwesomeIcon icon={faEnvelopeOpenText} color="grey" size="28"/>
                       ),
                   }}
                   initialParams={{
