@@ -38,7 +38,9 @@ class Content extends Component{
             NoOfInvites:0,
             Members:[],
             OwnerID:"",
-            UserRequests:false
+            UserRequests:false,
+            EventRequests:[],
+            Invites: [],
         };
       }
     componentDidMount(){
@@ -60,10 +62,19 @@ class Content extends Component{
                         if(doc.data().Members!=null)
                         {
                             this.setState({NoOfMembers: doc.data().Members.length});
+                            this.setState({Members: doc.data().Members});
                         }
                         if(doc.data().Invites!=null)
                         {
                             this.setState({NoOfInvites: doc.data().Invites.length});
+                        }
+                        if(doc.data().EventRequests!=null)
+                        {
+                            this.setState({EventRequests: doc.data().EventRequests});
+                        }
+                        if(doc.data().Invites!=null)
+                        {
+                            this.setState({Invites: doc.data().Invites});
                         }
                     }
                 });
@@ -225,7 +236,7 @@ class Content extends Component{
          if(this.state.Chat)
          {
              return(
-                 <Chat userid={this.props.route.params.userid} eventid={this.props.route.params.eventid} navigation={this.props.navigation} ShowAnimation={this.ShowAnimation}/>
+                 <Chat userid={this.props.route.params.userid} eventid={this.props.route.params.eventid} navigation={this.props.navigation} ShowAnimation={this.ShowAnimation} OwnerId={this.state.OwnerID}/>
              );
          }
      }
@@ -233,7 +244,7 @@ class Content extends Component{
          if(this.state.Photos)
          {
             return(
-                <EventMedia userid={this.props.route.params.userid} eventid={this.props.route.params.eventid} navigation={this.props.navigation} ShowAnimation={this.ShowAnimation}/>
+                <EventMedia userid={this.props.route.params.userid} eventid={this.props.route.params.eventid} navigation={this.props.navigation} ShowAnimation={this.ShowAnimation} OwnerId={this.state.OwnerID}/>
             );
          }
      }
@@ -241,7 +252,7 @@ class Content extends Component{
          if(this.state.Info)
          {
             return(
-                <EventInfo userid={this.props.route.params.userid} eventid={this.props.route.params.eventid} navigation={this.props.navigation} ShowAnimation={this.ShowAnimation}/>
+                <EventInfo userid={this.props.route.params.userid} eventid={this.props.route.params.eventid} navigation={this.props.navigation} ShowAnimation={this.ShowAnimation} OwnerId={this.state.OwnerID}/>
             );
          }
      }   
@@ -249,7 +260,7 @@ class Content extends Component{
         if(this.state.Users)
         {
            return(
-               <EventUsers userid={this.props.route.params.userid} eventid={this.props.route.params.eventid} navigation={this.props.navigation} ShowAnimation={this.ShowAnimation} OwnerName={this.state.Ownername} EventName={this.state.Name} EventImage={this.state.ImageUri}/>
+               <EventUsers userid={this.props.route.params.userid} eventid={this.props.route.params.eventid} navigation={this.props.navigation} ShowAnimation={this.ShowAnimation} OwnerId={this.state.OwnerID}/>
            );
         }
     }
@@ -257,7 +268,7 @@ class Content extends Component{
         if(this.state.UserRequests)
         {
             return(
-                <EventRequests userid={this.props.route.params.userid} eventid={this.props.route.params.eventid} navigation={this.props.navigation}/>
+                <EventRequests userid={this.props.route.params.userid} eventid={this.props.route.params.eventid} navigation={this.props.navigation} OwnerId={this.state.OwnerID}/>
             )
         }
     }   
@@ -273,7 +284,7 @@ class Content extends Component{
                         alignItems: 'center',
                         height: 0.25*windowHeight,
                     }}>
-                    <TouchableOpacity onPress={()=>{
+                    <TouchableOpacity disabled={this.state.OwnerID!=this.props.route.params.userid} onPress={()=>{
                         this.SelectImage();
                 }}><FastImage source={{
                     uri: this.state.ImageUri,
@@ -288,7 +299,7 @@ class Content extends Component{
                         justifyContent: 'center',
                         alignItems: 'center',
                     }} onPress={()=>{
-                        this.props.navigation.navigate("ShowMembers",{EventID: this.props.route.params.eventid});
+                        this.props.navigation.navigate("ShowMembers",{EventID: this.props.route.params.eventid,OwnerID: this.state.OwnerID,UserID: this.props.route.params.userid});
                     }}>
                         <Text style={{
                             fontSize: 20
@@ -301,7 +312,7 @@ class Content extends Component{
                         justifyContent: 'center',
                         alignItems: 'center'
                     }} onPress={()=>{
-                        this.props.navigation.navigate("ShowInvites",{EventID: this.props.route.params.eventid});
+                        this.props.navigation.navigate("ShowInvites",{EventID: this.props.route.params.eventid,OwnerID: this.state.OwnerID,UserID: this.props.route.params.userid});
                     }}>
                         <Text style={{
                             fontSize: 20
@@ -312,7 +323,7 @@ class Content extends Component{
                     </TouchableOpacity>
                 </View>
                 {
-                    this.state.OwnerID!=this.props.route.params.userid ? 
+                    this.state.OwnerID!=this.props.route.params.userid && !this.state.Members.includes(this.props.route.params.userid) && this.state.EventRequests.includes(this.props.route.params.userid) && this.state.Invites.includes(this.props.route.params.userid)  ? 
                     <TouchableOpacity onPress={()=>{
     this.EnterEvent();
 }}>
@@ -328,34 +339,104 @@ class Content extends Component{
                         }
                     </View>
                 </View>
+                {
+                    this.state.OwnerID==this.props.route.params.userid ? 
                 <View style={styles.Panel}>
-                    <TouchableOpacity style={styles.PanelFirstButton} onPress={()=>{
+                    <TouchableOpacity style={{
+        backgroundColor: '#dce8e7',
+        height: 50,
+        justifyContent: 'center',
+        alignItems:'center',
+        width: 0.2*windowWidth
+    }} onPress={()=>{
                         this.SetChat();
                     }}>
                         <FontAwesomeIcon icon={faComment} color="lightblue" size="40"/>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.PanelButton} onPress={()=>{
+                    <TouchableOpacity style={{
+        backgroundColor: '#dce8e7',
+        height: 50,
+        justifyContent: 'center',
+        alignItems:'center',
+        width: 0.2*windowWidth
+    }} onPress={()=>{
                         this.SetPhotos();
                     }}>
                         <FontAwesomeIcon icon={faImage} color="lightblue" size="40"/>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.PanelButton} onPress={()=>{
+                    <TouchableOpacity style={{
+        backgroundColor: '#dce8e7',
+        height: 50,
+        justifyContent: 'center',
+        alignItems:'center',
+        width: 0.2*windowWidth
+    }} onPress={()=>{
                         this.SetInfo();
                     }}>
                         <FontAwesomeIcon icon={faInfo} color="lightblue" size="40"/>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.PanelButton} onPress={()=>{
+                <TouchableOpacity style={{
+        backgroundColor: '#dce8e7',
+        height: 50,
+        justifyContent: 'center',
+        alignItems:'center',
+        width: 0.2*windowWidth
+    }} onPress={()=>{
                         this.SetUsers();
                     }}>
                         <FontAwesomeIcon icon={faUserCircle} color="lightblue" size="40"/>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.PanelLastButton} onPress={()=>{
+                    <TouchableOpacity style={{
+        backgroundColor: '#dce8e7',
+        height: 50,
+        justifyContent: 'center',
+        alignItems:'center',
+        width: 0.2*windowWidth
+    }} onPress={()=>{
                         this.SetUserRequests();
                     }}>
                         <FontAwesomeIcon icon={faUserFriends} color="lightblue" size="40"/>
                     </TouchableOpacity>
                 </View>
-                {
+                :
+                <View style={styles.Panel}>
+                    <TouchableOpacity style={{
+        backgroundColor: '#dce8e7',
+        height: 50,
+        justifyContent: 'center',
+        alignItems:'center',
+        width: 0.33*windowWidth
+    }} onPress={()=>{
+                        this.SetChat();
+                    }}>
+                        <FontAwesomeIcon icon={faComment} color="lightblue" size="40"/>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{
+        backgroundColor: '#dce8e7',
+        height: 50,
+        justifyContent: 'center',
+        alignItems:'center',
+        width: 0.33*windowWidth
+    }} onPress={()=>{
+                        this.SetPhotos();
+                    }}>
+                        <FontAwesomeIcon icon={faImage} color="lightblue" size="40"/>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{
+        backgroundColor: '#dce8e7',
+        height: 50,
+        justifyContent: 'center',
+        alignItems:'center',
+        width: 0.33*windowWidth
+    }} onPress={()=>{
+                        this.SetInfo();
+                    }}>
+                        <FontAwesomeIcon icon={faInfo} color="lightblue" size="40"/>
+                    </TouchableOpacity>
+                </View>
+
+            }
+                            {
                     DisplayChat()
                 }
                 {
@@ -418,27 +499,6 @@ const styles=StyleSheet.create({
         backgroundColor: '#dce8e7',
         width: windowWidth,
         elevation: 5,
-    },
-    PanelButton:{
-        backgroundColor: '#dce8e7',
-        height: 50,
-        justifyContent: 'center',
-        alignItems:'center',
-        width: 0.2*windowWidth
-    },
-    PanelFirstButton:{
-        backgroundColor: '#dce8e7',
-        height: 50,
-        justifyContent: 'center',
-        alignItems:'center',
-        width: 0.2*windowWidth
-    },
-    PanelLastButton:{
-        backgroundColor: '#dce8e7',
-        height: 50,
-        justifyContent: 'center',
-        alignItems:'center',
-        width: 0.2*windowWidth
     },
     ChatInput:{
         width: 300,

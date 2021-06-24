@@ -49,6 +49,7 @@ class EventInfo extends Component{
                 Price: res.data().Price,
                 Public: res.data().Public,
                 Time: res.data().Time,
+                Free: res.data().Free
              })
         })
     }
@@ -126,7 +127,8 @@ class EventInfo extends Component{
             Public: this.state.Public,
             Permission: this.state.Permission,
             Owner: this.props.userid,
-            Price: parseInt(this.state.Price)
+            Price: parseInt(this.state.Price),
+            Free: this.state.Free
           }).then(()=>{
             Alert.alert("","Event has been succesfuly updated");
           })
@@ -158,7 +160,7 @@ class EventInfo extends Component{
           if (this.state.Free)
           {
           return (
-            <TextInput placeholder="Set Price" placeholderTextColor="grey" style={styleevent.EventPrice} value={this.state.Price.toString()} keyboardType="number-pad" onChangeText={(value)=>{
+            <TextInput editable={this.props.userid==this.props.OwnerId} placeholder="Set Price" placeholderTextColor="grey" style={styleevent.EventPrice} value={this.state.Price.toString()} keyboardType="number-pad" onChangeText={(value)=>{
              this.SetPrice(value);
             }}/>
           )
@@ -240,6 +242,7 @@ class EventInfo extends Component{
           )
         }
           return(
+            <ScrollView showsVerticalScrollIndicator={false}>
               <View style={styleevent.centeredView}>
                 {
                   ShowDateTimeModal()
@@ -247,213 +250,215 @@ class EventInfo extends Component{
                 {
                   ShowTagModel()
                 }
-                  <ScrollView showsVerticalScrollIndicator={false}>
-                  <TextInput scrollEnabled={true} placeholder="Name" placeholderTextColor="grey" style={styleevent.EventName} value={this.state.Name} onChangeText={(value)=>{
+                  <TextInput editable={this.props.userid==this.props.OwnerId} scrollEnabled={true} placeholder="Name" placeholderTextColor="grey" style={styleevent.EventName} value={this.state.Name} onChangeText={(value)=>{
                     this.SetName(value);
                   }}/>
-                  <TouchableOpacity>
-
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styleevent.EventTags} onPress={()=>{
+                  <TouchableOpacity disabled={this.props.userid!=this.props.OwnerId} style={styleevent.EventTags} onPress={()=>{
                     this.ShowTagModal(true);
                   }}>
                     <TextInput multiline={true} editable={false} style={{fontSize: 20,color: 'grey'}} value={this.state.Tags.length==0 ? "Tags" : this.state.Tags.join(' ')}/>
                   </TouchableOpacity>
-                  <TextInput placeholder="Location" placeholderTextColor="grey" style={styleevent.EventAddress} value={this.state.Location} multiline={true} onChangeText={(value)=>{
+                  <TextInput editable={this.props.userid==this.props.OwnerId} placeholder="Location" placeholderTextColor="grey" style={styleevent.EventAddress} value={this.state.Location} multiline={true} onChangeText={(value)=>{
                     this.SetLocation(value);
                   }}/>
-                  <TouchableOpacity onPress={()=>{
+                  <TouchableOpacity style={{
+                  justifyContent: 'center',
+                    backgroundColor: '#dce8e7',
+          borderRadius: 5,
+          marginBottom: '5%',
+          height: 40,
+          fontWeight: '100',
+          color: 'grey',
+          fontSize: 20,
+          padding: '1%',
+          width: 0.9*windowWidth
+                  }} disabled={this.props.userid!=this.props.OwnerId} onPress={()=>{
                     this.SetDateModalVisible();
                     this.SetModalMode("date");
                   }}><Text style={styleevent.Time}>{this.state.Date}</Text></TouchableOpacity>
-                  <TouchableOpacity onPress={()=>{
+                  <TouchableOpacity style={{
+                  justifyContent: 'center',
+                    backgroundColor: '#dce8e7',
+          borderRadius: 5,
+          marginBottom: '5%',
+          height: 40,
+          fontWeight: '100',
+          color: 'grey',
+          fontSize: 20,
+          padding: '1%',
+          width: 0.9*windowWidth
+                  }} disabled={this.props.userid!=this.props.OwnerId} onPress={()=>{
                     this.SetDateModalVisible();
                     this.SetModalMode("time");
                   }}><Text style={styleevent.Time}>{this.state.Time}</Text></TouchableOpacity>
                   <Text style={styleevent.label}>Age Group:</Text>
                   <View style={styleevent.AgeView}>
-                      <TextInput style={styleevent.AgeInput} keyboardType="number-pad" placeholder="From" placeholderTextColor="grey" value={this.state.From} onChangeText={(value)=>{
+                      <TextInput editable={this.props.userid==this.props.OwnerId} style={styleevent.AgeInput} keyboardType="number-pad" placeholder="From" placeholderTextColor="grey" value={this.state.From} onChangeText={(value)=>{
                     this.SetFrom(value);
-                  }}/><Text style={styleevent.Seperator}>---</Text><TextInput style={styleevent.AgeInput} placeholderTextColor="grey" keyboardType="number-pad" placeholder="To" value={this.state.To} onChangeText={(value)=>{
+                  }}/>
+                  <View style={styleevent.Seperator}><Text>---</Text></View>
+                  <TextInput editable={this.props.userid==this.props.OwnerId} style={styleevent.AgeInput} placeholderTextColor="grey" keyboardType="number-pad" placeholder="To" value={this.state.To} onChangeText={(value)=>{
                     this.SetTo(value);
                   }}/>
                   </View>
                   <View style={styleevent.CheckBoxView}>
                     <Text style={styleevent.label}>Keep Public</Text>
-                    <CheckBox disabled={false} value={this.state.Public} onValueChange={(value)=>{
+                    <CheckBox disabled={this.props.userid!=this.props.OwnerId} value={this.state.Public} onValueChange={(value)=>{
                       this.SetPublic(value);
                     }}/>
                   </View>
                   <View style={styleevent.CheckBoxView}>
                     <Text style={styleevent.label}>Allow People To Post Content</Text>
-                    <CheckBox disabled={false} value={this.state.Permission} onValueChange={(value)=>{
+                    <CheckBox disabled={this.props.userid!=this.props.OwnerId} value={this.state.Permission} onValueChange={(value)=>{
                       this.SetPermission(value);
                     }}/>
                   </View>
                   <View style={styleevent.CheckBoxView}>
                     <Text style={styleevent.label}>Set Price</Text>
-                    <CheckBox disabled={false} value={this.state.Free} onValueChange={(value)=>{
+                    <CheckBox disabled={this.props.userid!=this.props.OwnerId} value={this.state.Free} onValueChange={(value)=>{
                       this.SetPriceVisible(value);
                     }}/>
                   </View>
                   {ShowPrice()}
+                {
+                  this.props.userid==this.props.OwnerId ?
                   <TouchableOpacity style={styleevent.Button} onPress={()=>{
                     this.UploadData();
                   }}>
                     <Text style={styleevent.Text3}>Update Event</Text>
-                  </TouchableOpacity>
-                  </ScrollView></View>
+                  </TouchableOpacity>:
+                  null
+      }
+      </View>
+                  </ScrollView>
   
           );
       }
   }
   export default EventInfo;
   const styleevent=StyleSheet.create({
-      centeredView: {
-          flex: 1,
-          flexDirection: 'column',
-          justifyContent: 'space-evenly',
-          alignItems: 'center',
-        },
-        EventName:{
-          width: 375,
-          height: 40,
-          backgroundColor: '#dce8e7',
-          borderRadius: 5,
-          marginBottom: '5%',
-          fontSize: 20,
-          padding: '1%',
-          marginTop: '3%',
-          color: 'grey'
-        },
-        EventDescription:{
-          width: 375,
-          height: 100,
-          backgroundColor: '#dce8e7',
-          marginBottom: '5%',
-          borderRadius: 5,
-          fontSize: 20,
-          padding: '1%'
-        },
-        EventTags:{
-          width: 375,
-          height: 100,
-          backgroundColor: '#dce8e7',
-          marginBottom: '5%',
-          borderRadius: 5,
-          padding: '1%',
-          justifyContent: 'center',
-          
-        },
-        EventAddress:{
-          width: 375,
-          height: 100,
-          backgroundColor: '#dce8e7',
-          marginBottom: '5%',
-          borderRadius: 5,
-          fontSize: 20,
-          padding: '1%',
-          fontSize: 20,
-          color: 'grey'
-        },
-        Image:{
-            width: 250,
-            height: 180,
-            marginTop: '5%',
-            alignSelf: 'center',
-            marginBottom: '5%',
-            backgroundColor: '#dce8e7'
-        },
-        Time:{
-          backgroundColor: '#dce8e7',
-          borderRadius: 5,
-          marginBottom: '5%',
-          height: 40,
-          fontWeight: '100',
-          color: 'grey',
-          fontSize: 20,
-          padding: '1%',
-          paddingTop: '2%',
-          width: 375
-  
-        },
-        label:{
-          height: 40,
-          fontWeight: '100',
-          color: 'grey',
-          fontSize: 20,
-          marginBottom: '1%',
-          marginRight: '5%'
-        },
-        AgeView:{
-            flexDirection: 'row'
-        },
-        AgeInput:{
-          width: 170,
-          height: 40,
-          backgroundColor: '#dce8e7',
-          borderRadius: 5,
-          marginBottom: '5%',
-          fontSize: 20,
-          padding: '1%',
-          fontSize: 20,
-          color: 'grey'
-        },
-        Seperator:{
-            marginLeft: '3%',
-            marginRight: '3%',
-            fontSize: 20,
-            marginTop: '1%'
-        },
-        CheckBoxView:{
+    centeredView: {
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'space-evenly',
+        alignItems: 'center',
+      },
+      EventName:{
+        width: 0.9*windowWidth,
+        height: 40,
+        backgroundColor: '#dce8e7',
+        borderRadius: 5,
+        marginBottom: '5%',
+        fontSize: 20,
+        padding: '1%',
+        marginTop: '3%',
+        color: 'grey'
+      },
+      EventTags:{
+        width: 0.9*windowWidth,
+        height: 100,
+        backgroundColor: '#dce8e7',
+        marginBottom: '5%',
+        borderRadius: 5,
+        padding: '1%',
+        justifyContent: 'center',
+        
+      },
+      EventAddress:{
+        width: 0.9*windowWidth,
+        height: 100,
+        backgroundColor: '#dce8e7',
+        marginBottom: '5%',
+        borderRadius: 5,
+        fontSize: 20,
+        padding: '1%',
+        fontSize: 20,
+        color: 'grey'
+      },
+      Time:{
+        fontSize: 20,
+        color: 'grey'
+      },
+      label:{
+        height: 40,
+        fontWeight: '100',
+        color: 'grey',
+        fontSize: 20,
+        marginBottom: '1%',
+      },
+      AgeView:{
           flexDirection: 'row',
-          marginBottom: '1%'
-        },
-        Button:{
-          backgroundColor: 'lightblue',
-          padding: '3%',
-          marginTop: '1%',
-          width: 350,
+          width: 0.9*windowWidth,
+          alignItems:'center',
+          justifyContent: 'space-evenly'
+      },
+      AgeInput:{
+        width: 0.4*windowWidth,
+        height: 40,
+        backgroundColor: '#dce8e7',
+        borderRadius: 5,
+        marginBottom: '5%',
+        fontSize: 20,
+        padding: '1%',
+        fontSize: 20,
+        color: 'grey'
+      },
+      Seperator:{
+        width: 0.1*windowWidth,
+        height: 40,
+          fontSize: 20,
           alignItems: 'center',
-          borderRadius: 10,
-          elevation: 5,
-          marginLeft: '3%',
-          marginBottom: '5%'
+          justifyContent: 'center',
+          marginBottom: 20
       },
-      Text3:{
-        fontSize:25,
-        fontStyle: 'italic',
-        fontWeight: '300'
+      CheckBoxView:{
+        flexDirection: 'row',
+        marginBottom: '1%'
+      },
+      Button:{
+        backgroundColor: 'lightblue',
+        padding: '3%',
+        marginTop: '1%',
+        width: 0.9*windowWidth,
+        alignItems: 'center',
+        borderRadius: 10,
+        elevation: 5,
+        marginBottom: '5%'
     },
-    EventPrice:{
-          height: 40,
-          backgroundColor: '#dce8e7',
-          borderRadius: 5,
-          marginBottom: '5%',
-          fontSize: 20,
-          padding: '1%',
-          width: 375,
-          fontSize: 20,
-          color: 'grey'
+    Text3:{
+      fontSize:25,
+      fontStyle: 'italic',
+      fontWeight: '300'
+  },
+  EventPrice:{
+        height: 40,
+        backgroundColor: '#dce8e7',
+        borderRadius: 5,
+        marginBottom: '5%',
+        fontSize: 20,
+        padding: '1%',
+        width: 375,
+        fontSize: 20,
+        color: 'grey'
 
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
     },
-    modalView: {
-      margin: 20,
-      backgroundColor: "white",
-      borderRadius: 10,
-      shadowColor: "#000",
-      shadowOffset: {
-        width: 0,
-        height: 2
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: 4,
-      elevation: 5,
-    },
-    centeredViewModal: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-  
-  });
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  centeredViewModal: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+});

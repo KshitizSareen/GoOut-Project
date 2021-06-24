@@ -7,7 +7,7 @@ import CheckBox from '@react-native-community/checkbox';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import Modal from 'react-native-modal';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faCannabis, faCheck, faCross, faInbox, faMinus, faPlus, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faCalendar, faCannabis, faCheck, faCross, faInbox, faMinus, faPlus, faTimes } from '@fortawesome/free-solid-svg-icons';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 import FastImage from 'react-native-fast-image';
@@ -147,8 +147,9 @@ class MyEvents extends Component{
                         fontSize: 40
                     }}>Events</Text>
                     <FontAwesomeIcon style={{
+                        marginTop: '5%',
                         alignSelf: 'center'
-                    }} icon={faInbox} size={(0.5*windowWidth).toString()} color="lightblue"/>
+                    }} icon={faCalendar} size={(0.5*windowWidth).toString()} color="lightblue"/>
                 </View>
             )
         }

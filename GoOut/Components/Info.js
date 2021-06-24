@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import NetInfo from '@react-native-community/netinfo';
-import { View,StyleSheet,Image,Text, Alert, BackHandler } from 'react-native';
+import { View,StyleSheet,Image,Text, Alert, BackHandler,Dimensions } from 'react-native';
 import {TextInput, TouchableOpacity } from 'react-native-gesture-handler';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -8,6 +8,8 @@ import AsyncStorage from '@react-native-community/async-storage';
 import storage from '@react-native-firebase/storage';
 import  ImagePicker from 'react-native-image-crop-picker'
 import * as Progress from 'react-native-progress';
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 class Info extends Component{
     constructor(){
         super();
@@ -163,7 +165,7 @@ class Info extends Component{
                   }
         }
         return(
-            <View style={styles.Background} behavior="height" enabled={true}>
+            <View style={styles.Background}>
                 <TouchableOpacity style={styles.ImageContainer} onPress={()=>{
                     this.SelectImage();
                 }}>
@@ -173,24 +175,17 @@ class Info extends Component{
                     }
                 } style={styles.Image} />
                 </TouchableOpacity>
-                <View style={styles.TextContainer}>
-                    <View style={styles.TextContainerInput}>
-                        <Text style={styles.TextLabel}>Email:</Text><TextInput style={styles.TextFields} keyboardType={"phone-pad"} value={this.state.doc.Email} editable={false}/>
-                        </View>
-                        <View style={styles.TextContainerInput}>
-                    <Text style={styles.TextLabel}>Username:</Text><TextInput style={styles.TextFields} value={this.state.Username} editable={false} onChange={(value)=>{
+                <View style={{
+                    height: 0.2*windowHeight,
+                    justifyContent: 'space-evenly',
+                    alignItems: 'center'
+                }}>
+                        <TextInput style={styles.TextFields} keyboardType={"phone-pad"} value={this.state.doc.Email} editable={false}/>
+                    <TextInput style={styles.TextFields} value={this.state.Username} editable={false} onChange={(value)=>{
                         this.setState({Username: value.nativeEvent.text});
                     }}/>
-                    </View>
-                        <View style={styles.TextContainerInput}>
-                        <Text style={styles.TextLabel}>Number:</Text><TextInput style={styles.code} keyboardType={"phone-pad"} value={this.state.code} onChangeText={(value)=>{
-                            this.InputNumber(value,1);
-                        }}/><TextInput style={styles.TextFields} keyboardType={"phone-pad"} value={this.state.phone} onChangeText={(value)=>{
-                            this.InputNumber(value,2);
-                        }}/>
                         </View>
                         
-                    </View>
                     <View style={styles.ButtonContainer}>
                     <TouchableOpacity style={styles.Button} onPress={()=>{
                         this.ConfirmChanges();
@@ -212,21 +207,20 @@ class Info extends Component{
 }
 const styles=StyleSheet.create({
     Image:{
-        width: 150,
-        height: 150,
+        height: 0.2*windowHeight,
+        width: 0.4*windowWidth,
         borderRadius: 70,
     },
     ImageContainer:{
-        marginTop: '90%',
         marginBottom: '5%',
-    },
-    TextContainer:{
-        flexDirection: 'column',
-        
+        marginTop: '5%'
     },
     TextContainerInput:{
         flexDirection: 'row',
-        marginBottom: '5%'
+        marginBottom: '5%',
+        alignItems: 'center',
+        width: windowWidth,
+        justifyContent: 'space-evenly'
     },
     TextLabel:{
         paddingTop: '1.5%',
@@ -240,19 +234,18 @@ const styles=StyleSheet.create({
     TextFields:{
           borderRadius: 10,
           backgroundColor: '#dce8e7',
-          width: 230,
+          width: 0.7*windowWidth,
           alignContent: 'center',
         },
     code:{
         borderRadius: 10,
         backgroundColor: '#dce8e7',
-        width: 50,
+        width: 0.1*windowWidth,
         alignContent: 'center',
         marginRight: '2%',
   },
     Background:{
         flex: 1,
-        flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -260,11 +253,10 @@ const styles=StyleSheet.create({
         backgroundColor: 'lightblue',
         padding: '3%',
         marginTop: '5%',
-        width: 250,
+        width: 0.7*windowWidth,
         alignItems: 'center',
         borderRadius: 10,
         elevation: 5,
-        marginLeft: '20%',
     },
     Text3:{
         fontSize:25,
@@ -272,47 +264,10 @@ const styles=StyleSheet.create({
         fontWeight: '300'
     },
     ButtonContainer:{
-        marginTop: '5%',
-        marginBottom: '60%',
-        marginRight: '12%'
+        alignItems:'center',
+        justifyContent: 'center'
     },
 })
-const stylesMultiSelect = StyleSheet.create({
-    center: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginTop: 30,
-    },
-    container: {
-      paddingTop: 40,
-      paddingHorizontal: 20,
-    },
-    welcome: {
-      fontSize: 20,
-      textAlign: 'center',
-      margin: 10,
-      color: '#333',
-    },
-    border: {
-      borderBottomWidth: 1,
-      borderBottomColor: '#dadada',
-      marginBottom: 20,
-    },
-    heading: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      marginBottom: 5,
-      marginTop: 20,
-    },
-    label: {
-      fontWeight: 'bold',
-    },
-    switch: {
-      marginBottom: 20,
-      flexDirection: 'row',
-      alignItems: 'flex-end',
-      justifyContent: 'space-between',
-    },
-  })
-  export default Info;
+
+
+export default Info;

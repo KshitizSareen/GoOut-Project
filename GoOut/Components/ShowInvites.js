@@ -103,6 +103,8 @@ class ShowInvites extends Component{
                                 margin: '1%'
                             }}/>
                             <Text style={{fontSize: 15,width: 0.55*windowWidth,alignSelf: 'center'}}>{this.state.UserNames[data.index]}</Text>
+                            {
+                                this.props.route.params.OwnerID == this.props.route.params.UserID ?
                             <View style={{
                                 flexDirection: 'row',
                                 width: 0.3*windowWidth,
@@ -115,6 +117,9 @@ class ShowInvites extends Component{
                                 <FontAwesomeIcon icon={faMinus} size="20"/>
                             </TouchableOpacity>
                             </View>
+                            :
+                            null
+                }
                             </View>
                     )
                 }}/>
@@ -132,6 +137,7 @@ class ShowInvites extends Component{
                         fontSize: 40
                     }}>Invites</Text>
                     <FontAwesomeIcon style={{
+                        marginTop: '5%',
                         alignSelf: 'center'
                     }} icon={faUser} size={(0.5*windowWidth).toString()} color="lightblue"/>
                 </View>

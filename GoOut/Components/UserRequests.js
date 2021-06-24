@@ -149,7 +149,12 @@ class UserRequests extends Component{
                         alignSelf: 'center',
                         fontSize: 40
                     }}>Invites</Text>
+                    <Text style={{
+                        alignSelf: 'center',
+                        fontSize: 40
+                    }}>Sent</Text>
                     <FontAwesomeIcon style={{
+                        marginTop: '5%',
                         alignSelf: 'center'
                     }} icon={faInbox} size={(0.5*windowWidth).toString()} color="lightblue"/>
                 </View>

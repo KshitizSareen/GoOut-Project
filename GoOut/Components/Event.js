@@ -108,7 +108,9 @@ class EventCreate extends Component{
             Permission: this.state.Permission,
             Owner: this.props.route.params.userid,
             Price: parseInt(this.state.Price),
-            ImageUri: "https://firebasestorage.googleapis.com/v0/b/goout-4391e.appspot.com/o/a1695e7b-5875-4314-bf70-b50c4a0386f3_200x200.png?alt=media&token=8c962cb0-02e9-4f51-bec2-e2699cebcfac"
+            Free: this.state.Free,
+            ImageUri: "https://firebasestorage.googleapis.com/v0/b/goout-4391e.appspot.com/o/a1695e7b-5875-4314-bf70-b50c4a0386f3_200x200.png?alt=media&token=8c962cb0-02e9-4f51-bec2-e2699cebcfac",
+            SearchArray: this.GenerateSubstrings(this.state.Name.toLowerCase().trim())
           }).then((doc)=>{
             Alert.alert("","Event has been succesfuly created");
           })
@@ -118,13 +120,27 @@ class EventCreate extends Component{
         }
       })
     }
-
+    GenerateSubstrings=(Name,Tags)=>{
+      var Substrings=[];
+      for(var j=0;j<Name.length;j++)
+      {
+          var k=5;
+          while(k<Name.length)
+          {
+          var NameSubString=Name.substring(j,j+k);
+          Substrings.push(NameSubString);
+          k+=1;
+          }
+      }
+      Substrings.push(Name);
+      return Substrings;
+  }
     ShowTagModal=(value)=>{
       this.setState({TagModel: value});
     }
     AddTag=(Tag)=>{
       var Tags=this.state.Tags;
-      Tags.push('#'+Tag);
+      Tags.push('#'+Tag.toLowerCase().trim());
       this.setState({Tags: Tags});
       this.setState({Tag:""});
     }
@@ -245,11 +261,33 @@ class EventCreate extends Component{
                   <TextInput placeholder="Location" placeholderTextColor="grey" style={styleevent.EventAddress} value={this.state.Location} multiline={true} onChangeText={(value)=>{
                     this.SetLocation(value);
                   }}/>
-                  <TouchableOpacity onPress={()=>{
+                  <TouchableOpacity style={{
+                  justifyContent: 'center',
+                    backgroundColor: '#dce8e7',
+          borderRadius: 5,
+          marginBottom: '5%',
+          height: 40,
+          fontWeight: '100',
+          color: 'grey',
+          fontSize: 20,
+          padding: '1%',
+          width: 0.9*windowWidth
+                  }} onPress={()=>{
                     this.SetDateModalVisible();
                     this.SetModalMode("date");
                   }}><Text style={styleevent.Time}>{this.state.Date}</Text></TouchableOpacity>
-                  <TouchableOpacity onPress={()=>{
+                  <TouchableOpacity style={{
+                    justifyContent: 'center',
+                    backgroundColor: '#dce8e7',
+          borderRadius: 5,
+          marginBottom: '5%',
+          height: 40,
+          fontWeight: '100',
+          color: 'grey',
+          fontSize: 20,
+          padding: '1%',
+          width: 0.9*windowWidth
+                  }} onPress={()=>{
                     this.SetDateModalVisible();
                     this.SetModalMode("time");
                   }}><Text style={styleevent.Time}>{this.state.Time}</Text></TouchableOpacity>
@@ -257,7 +295,7 @@ class EventCreate extends Component{
                   <View style={styleevent.AgeView}>
                       <TextInput style={styleevent.AgeInput} keyboardType="number-pad" placeholder="From" placeholderTextColor="grey" value={this.state.From} onChangeText={(value)=>{
                     this.SetFrom(value);
-                  }}/><Text style={styleevent.Seperator}>---</Text><TextInput style={styleevent.AgeInput} placeholderTextColor="grey" keyboardType="number-pad" placeholder="To" value={this.state.To} onChangeText={(value)=>{
+                  }}/><View style={styleevent.Seperator}><Text>---</Text></View><TextInput style={styleevent.AgeInput} placeholderTextColor="grey" keyboardType="number-pad" placeholder="To" value={this.state.To} onChangeText={(value)=>{
                     this.SetTo(value);
                   }}/>
                   </View>
@@ -300,7 +338,7 @@ class EventCreate extends Component{
           alignItems: 'center',
         },
         EventName:{
-          width: 375,
+          width: 0.9*windowWidth,
           height: 40,
           backgroundColor: '#dce8e7',
           borderRadius: 5,
@@ -310,17 +348,8 @@ class EventCreate extends Component{
           marginTop: '3%',
           color: 'grey'
         },
-        EventDescription:{
-          width: 375,
-          height: 100,
-          backgroundColor: '#dce8e7',
-          marginBottom: '5%',
-          borderRadius: 5,
-          fontSize: 20,
-          padding: '1%'
-        },
         EventTags:{
-          width: 375,
+          width: 0.9*windowWidth,
           height: 100,
           backgroundColor: '#dce8e7',
           marginBottom: '5%',
@@ -330,7 +359,7 @@ class EventCreate extends Component{
           
         },
         EventAddress:{
-          width: 375,
+          width: 0.9*windowWidth,
           height: 100,
           backgroundColor: '#dce8e7',
           marginBottom: '5%',
@@ -340,26 +369,9 @@ class EventCreate extends Component{
           fontSize: 20,
           color: 'grey'
         },
-        Image:{
-            width: 250,
-            height: 180,
-            marginTop: '5%',
-            alignSelf: 'center',
-            marginBottom: '5%',
-            backgroundColor: '#dce8e7'
-        },
         Time:{
-          backgroundColor: '#dce8e7',
-          borderRadius: 5,
-          marginBottom: '5%',
-          height: 40,
-          fontWeight: '100',
-          color: 'grey',
           fontSize: 20,
-          padding: '1%',
-          paddingTop: '2%',
-          width: 375
-  
+          color: 'grey'
         },
         label:{
           height: 40,
@@ -367,13 +379,15 @@ class EventCreate extends Component{
           color: 'grey',
           fontSize: 20,
           marginBottom: '1%',
-          marginRight: '5%'
         },
         AgeView:{
-            flexDirection: 'row'
+            flexDirection: 'row',
+            width: 0.9*windowWidth,
+            alignItems:'center',
+            justifyContent: 'space-evenly'
         },
         AgeInput:{
-          width: 170,
+          width: 0.4*windowWidth,
           height: 40,
           backgroundColor: '#dce8e7',
           borderRadius: 5,
@@ -384,10 +398,12 @@ class EventCreate extends Component{
           color: 'grey'
         },
         Seperator:{
-            marginLeft: '3%',
-            marginRight: '3%',
+          width: 0.1*windowWidth,
+          height: 40,
             fontSize: 20,
-            marginTop: '1%'
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 20
         },
         CheckBoxView:{
           flexDirection: 'row',
@@ -397,11 +413,10 @@ class EventCreate extends Component{
           backgroundColor: 'lightblue',
           padding: '3%',
           marginTop: '1%',
-          width: 350,
+          width: 0.9*windowWidth,
           alignItems: 'center',
           borderRadius: 10,
           elevation: 5,
-          marginLeft: '3%',
           marginBottom: '5%'
       },
       Text3:{

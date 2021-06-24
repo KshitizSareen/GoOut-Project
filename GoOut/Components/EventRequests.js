@@ -213,8 +213,9 @@ class EventRequests extends Component{
                         fontSize: 40
                     }}>Invites</Text>
                     <FontAwesomeIcon style={{
+                        marginTop: '5%',
                         alignSelf: 'center'
-                    }} icon={faInbox} size={(0.5*windowWidth).toString()} color="lightblue"/>
+                    }} icon={faUser} size={(0.5*windowWidth).toString()} color="lightblue"/>
                 </View>
             )
         }

@@ -47,7 +47,7 @@ class Chat extends Component{
             }
         })
         messaging().onMessage( async msg=>{
-            //this.GetMessages();
+            his.GetMessages();
         })
     }
     SendMessage=(type)=>{
@@ -298,15 +298,12 @@ class Chat extends Component{
                     ShowModel()
                 }
                 <FlatList style={styles.Messages} data={this.state.Messages} renderItem={(data)=>{
-                    console.log(data.item);
                     if(data.item.type==0)
                     {
                     return(
                         <View style={styles.Message}>
                             <Text style={styles.TextName}>{data.item.User.Name}</Text>
                     <Text style={styles.TextData}>{data.item.Message}</Text>
-
-         
                         </View>
                     )
                     }
@@ -320,7 +317,7 @@ class Chat extends Component{
                                 alignItems: 'center'
                             }}>
                             <TouchableOpacity style={{
-                                width: 40,
+                                width: 0.1*windowWidth,
                                 margin: '1%'
                                 
                             }} onPress={()=>{
@@ -358,7 +355,7 @@ class Chat extends Component{
                                 alignItems: 'center'
                             }}>
                             <TouchableOpacity style={{
-                                width: 40,
+                                width: 0.1*windowWidth,
                                 margin: '1%'
                                 
                             }} onPress={()=>{
@@ -409,14 +406,13 @@ const styles=StyleSheet.create({
         backgroundColor: '#dce8e7',
         borderRadius: 10,
         alignSelf: 'center',
-        color: 'black'
     },
     CaptionInput:{
         width: 200,
         height: 40,
         backgroundColor: '#dce8e7',
         borderRadius: 10,
-        marginTop: '5%'
+        marginTop: '5%',
     },
     CaptionView: {
         flex: 1,
@@ -427,9 +423,11 @@ const styles=StyleSheet.create({
       },
     Chat:{
         flexDirection: 'row',
-        justifyContent: 'center',
+        justifyContent: 'space-evenly',
         padding: '1%',
-    },
+        width: windowWidth,
+        alignItems: 'center',
+        },
     Messages:{
             margin: '2%',
         },
@@ -442,7 +440,7 @@ const styles=StyleSheet.create({
         fontWeight: '800',
         borderRadius: 10,
         padding: '1%',
-        width: 0.95*windowWidth
+        width: 0.95*windowWidth,
     },
     TextData:{
         fontFamily: 'serif',
@@ -471,17 +469,16 @@ const styles=StyleSheet.create({
       },
       modalInnerView:{
         justifyContent: 'space-evenly',
-        flexDirection: 'row'
+        flexDirection: 'row',
       },
       ModalUpload:{
           flexDirection: 'row',
       },
       IconsUpload:{
-          margin: '5%'
+          margin: '5%',
       },
       UploadButton:{
           alignSelf: 'flex-end',
-          marginLeft: '3%'
       },
         ProgressIndicator:{
             alignSelf: 'flex-start',

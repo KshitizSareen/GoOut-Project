@@ -2,10 +2,12 @@ import React, {Component} from 'react';
 import NetInfo from '@react-native-community/netinfo';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import {faSearch,faWindowClose,faCheck, faPlus} from '@fortawesome/free-solid-svg-icons';
-import { View,StyleSheet,Image,Text, Alert} from 'react-native';
+import { View,StyleSheet,Image,Text, Alert,Dimensions} from 'react-native';
 import { FlatList, TextInput, TouchableOpacity } from 'react-native-gesture-handler';
 import firestore from '@react-native-firebase/firestore';
 import SectionedMultiSelect from 'react-native-sectioned-multi-select';
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
   const items = [
       // this is the parent or 'item'
       {
@@ -20,154 +22,59 @@ class Events extends Component{
         super();
         this.state = {
           selectedItems: [],
-          Events: null,
+          Events: [],
+          EventKey:""
         };
       }
-      componentDidMount(){
-          this.userid=this.props.route.params.userid;
-          NetInfo.fetch().then((state)=>{
-              if(state.isConnected)
+      SearchEvents=(Event)=>{
+        firestore().collection('Events').where("SearchArray","array-contains",Event.toLowerCase().trim()).limit(1000).get().then(NameResults=>{
+          firestore().collection('Events').where("tags","array-contains",Event.toLowerCase().trim()).limit(1000).get().then(TagResults=>{
+            var Events=[];
+            var EventIDSet=new Set();
+            for(var i=0;i<NameResults.docs.length;i++)
+            {
+              if (!EventIDSet.has(NameResults.docs[i].id))
               {
-                  this.GetEvents();
+                EventIDSet.add(NameResults.docs[i].id);
+                Events.push(NameResults.docs[i]);
               }
-              else{
-                Alert.alert("","Please connect to the internet");
+            }
+            for(var i=0;i<TagResults.docs.length;i++)
+            {
+              if (!EventIDSet.has(TagResults.docs[i].id))
+              {
+                EventIDSet.add(TagResults.docs[i].id);
+                Events.push(TagResults.docs[i]);
               }
+            }
+            console.log(Events);
+            this.setState({Events: Events});
           })
-      }
-    GetEvents= async ()=>{
-        var Eventarray=[];
-        const snapshot = await firestore().collection('Events').get()
-        snapshot.docs.map(doc => Eventarray.push({data:doc.data(),id:doc.id}));
-        this.setState({Events: Eventarray})
-      }
-      onSelectedItemsChange = (selectedItems) => {
-        this.setState({ selectedItems });
-      };
-    icon = ({ name, size = 18, style }) => {
-        // flatten the styles
-        const flat = StyleSheet.flatten(style)
-        // remove out the keys that aren't accepted on View
-        const { color, fontSize, ...styles } = flat
-    
-        let iconComponent
-        // the colour in the url on this site has to be a hex w/o hash
-        const iconColor = color && color.substr(0, 1) === '#' ? `${color.substr(1)}/` : ''
-    
-        const Search = (
-            <FontAwesomeIcon icon={faSearch} size="15" />
-          )
-          const Close = (
-            <FontAwesomeIcon icon={faWindowClose} size="15" />
-          )
-      
-          const Check = (
-            <FontAwesomeIcon icon={faCheck} size="15" />
-          )
-          const Cancel = (
-            <FontAwesomeIcon icon={faWindowClose} size="10" />
-          )
-          const Down = (
-            <Image
-            />
-          )
-          const Up = (
-            <Image
-            />
-          )
-    
-        switch (name) {
-          case 'search':
-            iconComponent = Search
-            break
-          case 'keyboard-arrow-up':
-            iconComponent = Up
-            break
-          case 'keyboard-arrow-down':
-            iconComponent = Down
-            break
-          case 'close':
-            iconComponent = Close
-            break
-          case 'check':
-            iconComponent = Check
-            break
-          case 'cancel':
-            iconComponent = Cancel
-            break
-          default:
-            iconComponent = null
-            break
-        }
-        return <View style={stylesMultiSelect}>{iconComponent}</View>
+        })
       }
     render(){
         return(
             <View style={styleevent.Background}>
-                <View style={styleevent.Search}>
-                    <TextInput placeholder={"Search Here"} style={styleevent.Bar}/>
-                </View>
-                <View style={{
-                    width: 300
-                }}>
-                <SectionedMultiSelect
-          items={items}
-          IconRenderer={this.icon}
-          uniqueKey="id"
-          subKey="children"
-          selectText="Tags..."
-          showDropDowns={true}
-          expandDropDowns={true}
-          readOnlyHeadings={false}
-          onSelectedItemsChange={this.onSelectedItemsChange}
-          selectedItems={this.state.selectedItems}
-          modalWithTouchable={true}
-          styles={{
-              itemText:{
-                  fontSize: 20,
-                  fontWeight: 'normal'
-              },
-              chipContainer:{
-                  width: 80,
-                  justifyContent: 'space-around',
-              },
-              chipText: {
-                  fontStyle: 'italic',
-              },
-              selectToggle:{
-                backgroundColor: '#dce8e7',
-                marginTop: '5%',
-                marginBottom: '1%',
-                borderRadius: 10,
-                width:300,
-              },
-              selectToggleText:{
-                  textAlign: 'center'
-              }
-              
-              
-          }}
-          />
-          <View style={styleevent.AddEvent}>
-              <Text style={styleevent.TextEvent}>Add Event</Text>
-              <TouchableOpacity onPress={()=>{
-                 this.props.navigation.navigate("EventCreate",{userid: this.userid});
+               <TouchableOpacity style={styleevent.AddEvent} onPress={()=>{
+                 this.props.navigation.navigate("EventCreate",{userid: this.props.route.params.userid});
               }}>
-                  <FontAwesomeIcon icon={faPlus} size="23"/>
-              </TouchableOpacity>
-          </View>
-          </View>
-          <FlatList data={this.state.Events} renderItem={(event)=>{
+              <Text style={styleevent.TextEvent}>Add Event</Text>
+          </TouchableOpacity>
+          <TextInput placeholder={"Search Here"} style={styleevent.Bar} value={this.state.EventKey} onChange={(value=>{
+            this.setState({EventKey: value.nativeEvent.text});
+            this.SearchEvents(value.nativeEvent.text);
+          })}/>
+          <FlatList data={this.state.Events} style={{marginTop: '4%'}} renderItem={(event)=>{
               return(
                   <TouchableOpacity style={styleevent.EventContainer} onPress={()=>{
-                      this.props.navigation.navigate("Content",{userid: this.userid,eventid:event.item.id,EventName: event.item.data.Name });
-                  }} ><Text style={styleevent.title}>{event.item.data.Name}</Text>
+                      this.props.navigation.navigate("Content",{userid: this.props.route.params.userid,eventid:event.item.id,EventName: event.item.data().Name });
+                  }} ><Text style={styleevent.title}>{event.item.data().Name}</Text>
                     <Image style={styleevent.Image} source={
                         {
-                            uri: "https://firebasestorage.googleapis.com/v0/b/goout-eb557.appspot.com/o/Image_Add-512.png?alt=media&token=dc8cb0cb-b5b6-4eae-bc87-ca303728902f"
+                            uri: event.item.data().ImageUri
                         }
                     }/></TouchableOpacity>);
-          }} keyExtractor={event=>event.id} ItemSeparatorComponent={()=>{
+          }} ItemSeparatorComponent={()=>{
               return(<View style={styleevent.ItemSeparatorComponent}/>);
           }}/>
                 </View>       
@@ -183,11 +90,11 @@ const styleevent=StyleSheet.create({
     },
     Search:{
         flexDirection: 'row',
-        marginTop: '10%'
+        marginTop: '3%'
     },
     Bar:{
-        width: 300,
-        height: 40,
+        width: 0.9*windowWidth,
+        height: 50,
         backgroundColor: '#dce8e7',
         borderRadius: 10
     },
@@ -195,16 +102,14 @@ const styleevent=StyleSheet.create({
         backgroundColor: '#d8dee8',
         borderTopRightRadius: 10,
         borderBottomRightRadius: 10,
-        
-    },
+      },
     AddEvent:{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
         backgroundColor: '#dce8e7',
-        marginTop: '10%',
+        marginTop: '3%',
         borderRadius: 10,
         padding: 10,
-        marginBottom: '10%'
+        marginBottom: '3%'
     },
     TextEvent:{
         fontSize: 19,
@@ -214,65 +119,27 @@ const styleevent=StyleSheet.create({
       },
       title: {
         fontSize: 25,
-        margin: '3%',
+        width: 0.7*windowWidth
       },
       EventContainer:{
-          backgroundColor: '#fae49b',
+          backgroundColor: 'lightblue',
           borderRadius: 10,
           flexDirection: 'row',
           justifyContent: 'space-between',
-          width: 400,
           elevation: 5,
-          marginBottom: '1%'
+          marginBottom: '1%',
+          width: 0.9*windowWidth,
+          padding: '1%',
+          alignItems: 'center'
       },
       ItemSeparatorComponent:{
-          marginBottom: '2%',
           marginTop: '2%',
           backgroundColor: 'black',
-          height: 1,
       },
       Image:{
         width: 50,
         height: 50,
-        alignSelf: 'center'
+        borderRadius: 50
     },
 })
 export default Events;
-const stylesMultiSelect = StyleSheet.create({
-    center: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginTop: 30,
-    },
-    container: {
-      paddingTop: 40,
-      paddingHorizontal: 20,
-    },
-    welcome: {
-      fontSize: 20,
-      textAlign: 'center',
-      margin: 10,
-      color: '#333',
-    },
-    border: {
-      borderBottomWidth: 1,
-      borderBottomColor: '#dadada',
-      marginBottom: 20,
-    },
-    heading: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      marginBottom: 5,
-      marginTop: 20,
-    },
-    label: {
-      fontWeight: 'bold',
-    },
-    switch: {
-      marginBottom: 20,
-      flexDirection: 'row',
-      alignItems: 'flex-end',
-      justifyContent: 'space-between',
-    },
-  })

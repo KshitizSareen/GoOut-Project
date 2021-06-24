@@ -21,16 +21,28 @@ class EventUsers extends Component{
         super()
         this.state={
             Username:"",
-            Users:[]
+            Users:[],
+            Members:[],
+            Ownerid:""
         }
     }
     componentDidMount(){
+        firestore().collection('Events').doc(this.props.eventid).get().then(event=>{
+            this.setState({Ownerid: event.data().Owner});
+        })
     }
     SearchUsers=(Username)=>{
         if(Username!="")
         {
+            firestore().collection('Events').doc(this.props.eventid).get().then(EventData=>{
+                var Members=[];
+                if(EventData.data().Members!=null)
+                {
+                    Members=EventData.data().Members;
+                }
+                this.setState({Members: Members});
+            })
             firestore().collection('Users').where("userid","!=",auth().currentUser.uid).where("SearchArray","array-contains",Username.toLowerCase()).limit(1000).get().then(res=>{
-                console.log(res.docs);
                 this.setState({Users: res.docs});
             })
         }
@@ -167,6 +179,8 @@ class EventUsers extends Component{
                     this.SearchUsers(value.nativeEvent.text);
                 }}/>
                 <FlatList data={this.state.Users} renderItem={(data)=>{
+                    if(!this.state.Members.includes(data.item.id) && data.item.id!=this.state.Ownerid)
+                    {
                     return(
                         <View style={{
                             flexDirection: 'row',
@@ -201,6 +215,7 @@ class EventUsers extends Component{
                             }
                             </View>
                     )
+                        }
                 }}/>
             </View>
         )

@@ -5,7 +5,7 @@ import{
   Text,
   TouchableOpacity,
   Alert,
-  TextInput, Image,
+  TextInput, Image,Dimensions,
    KeyboardAvoidingView
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -14,6 +14,8 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import Modal from 'react-native-modal';
 import messaging from '@react-native-firebase/messaging';
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 class SignIn extends Component{
     constructor(){
         super()
@@ -182,7 +184,7 @@ class SignIn extends Component{
     render()
     {
         return(
-            <View style={styles.View} behavior="height" enabled={true}>
+            <View style={styles.View}>
             <Image source={require('../static/a1695e7b-5875-4314-bf70-b50c4a0386f3_200x200.png') 
             } style={styles.Image}/>
             <View style={styles.TextContainer}>
@@ -211,7 +213,7 @@ class SignIn extends Component{
             this.SetModalLoginVisible();
         }}
       >
-        <View style={styles.centeredView} >
+        <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <TextInput placeholder="Email" style={styles.textinput} value={this.state.username} onChangeText={(value)=>{
                 this.setState({username: value});
@@ -275,10 +277,9 @@ const styles= StyleSheet.create({
         
     },
     Image:{
-        height: 100,
-        width: 400,
+        height: 0.1*windowHeight,
+        width: 0.2*windowWidth,
         resizeMode: 'contain',
-        marginBottom: '1%'
         
     },
     Text1:{
@@ -300,7 +301,7 @@ const styles= StyleSheet.create({
         backgroundColor: 'lightblue',
         padding: '3%',
         marginTop: '5%',
-        width: 120,
+        width: 0.3*windowWidth,
         alignItems: 'center',
         borderRadius: 10,
         elevation: 5
@@ -310,7 +311,6 @@ const styles= StyleSheet.create({
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        position: 'absolute',
         alignSelf: 'center'
       },
       modalView: {
@@ -319,17 +319,18 @@ const styles= StyleSheet.create({
         borderRadius: 20,
         elevation: 5,
         justifyContent: 'space-between',
+        alignItems: 'center'
       },
       textinput:{
           marginBottom: '5%',
           borderRadius: 10,
           backgroundColor: '#f0f2f5',
-          width: 200,
+          width: 0.5*windowWidth,
           alignContent: 'center'
       },
       ButtonModal:{
         backgroundColor: 'lightblue',
-        width: 200,
+        width: 0.5*windowWidth,
         alignItems: 'center',
         borderRadius: 10,
         elevation: 5,
