@@ -27,8 +27,8 @@ class Events extends Component{
         };
       }
       SearchEvents=(Event)=>{
-        firestore().collection('Events').where("SearchArray","array-contains",Event.toLowerCase().trim()).limit(1000).get().then(NameResults=>{
-          firestore().collection('Events').where("tags","array-contains",Event.toLowerCase().trim()).limit(1000).get().then(TagResults=>{
+        firestore().collection('Events').where("SearchArray","array-contains",Event.toLowerCase().trim()).where("Public","==",true).limit(1000).get().then(NameResults=>{
+          firestore().collection('Events').where("Tags","array-contains",Event.toLowerCase().trim()).where("Public","==",true).limit(1000).get().then(TagResults=>{
             var Events=[];
             var EventIDSet=new Set();
             for(var i=0;i<NameResults.docs.length;i++)

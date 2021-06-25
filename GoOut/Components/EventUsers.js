@@ -23,7 +23,8 @@ class EventUsers extends Component{
             Username:"",
             Users:[],
             Members:[],
-            Ownerid:""
+            Ownerid:"",
+            EventRequests:[]
         }
     }
     componentDidMount(){
@@ -40,6 +41,12 @@ class EventUsers extends Component{
                 {
                     Members=EventData.data().Members;
                 }
+                var EventRequests=[];
+                if(EventData.data().EventRequests!=null)
+                {
+                    EventRequests=EventData.data().EventRequests;
+                }
+                this.setState({EventRequests: EventRequests});
                 this.setState({Members: Members});
             })
             firestore().collection('Users').where("userid","!=",auth().currentUser.uid).where("SearchArray","array-contains",Username.toLowerCase()).limit(1000).get().then(res=>{
@@ -179,7 +186,7 @@ class EventUsers extends Component{
                     this.SearchUsers(value.nativeEvent.text);
                 }}/>
                 <FlatList data={this.state.Users} renderItem={(data)=>{
-                    if(!this.state.Members.includes(data.item.id) && data.item.id!=this.state.Ownerid)
+                    if(!this.state.Members.includes(data.item.id) && !this.state.EventRequests.includes(data.item.id) && data.item.id!=this.state.Ownerid)
                     {
                     return(
                         <View style={{

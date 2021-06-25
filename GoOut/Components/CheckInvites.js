@@ -24,7 +24,7 @@ class CheckInvites extends Component{
         }
     }
     componentDidMount(){
-        console.log(10);
+        console.log(this.props.route.params.UserID);
         this.FetchInvites();
         messaging().onMessage(async msg=>{
             console.log("message received");
@@ -49,6 +49,7 @@ class CheckInvites extends Component{
 
     FetchInvites=()=>{
         firestore().collection('Users').doc(this.props.route.params.UserID).get().then(doc=>{
+            console.log(doc.data());
             if(doc.data().InvitedBy!=null)
             {
                 this.setState({Invites: doc.data().InvitedBy});
@@ -57,14 +58,17 @@ class CheckInvites extends Component{
         });
     }
     AddUser=(Invite,index)=>{
-        firestore().collection('Events').doc(Invite).get().then(Event=>{
+        var EventDoc=firestore().collection('Events').doc(Invite);
+        var UserDoc=firestore().collection('Users').doc(this.props.route.params.UserID);
+        var InvitedBy=[];
+        firestore().runTransaction(async transaction=>{
+            const Event=await transaction.get(EventDoc);
             var Members=[];
             if(Event.data().Members!=null)
             {
                 Members=Event.data().Members;
             }
-            Members.push( this.props.route.params.UserID
-            );
+            Members.push( this.props.route.params.UserID );
             var Invites=[];
             if(Event.data().Invites!=null)
             {
@@ -80,26 +84,28 @@ class CheckInvites extends Component{
                 }
             }
             Invites.splice(UserIndex,1);
-            firestore().collection('Events').doc(Invite).update({
+            transaction.update(EventDoc,{
                 Members: Members,
                 Invites: Invites
             })
-            firestore().collection('Users').doc(this.props.route.params.UserID).get().then(User=>{
+            const User=await transaction.get(UserDoc);
                 var MembersOf=[];
                 if(User.data().MembersOf!=null)
                 {
                     MembersOf=User.data().MembersOf;
                 }
-                MembersOf.push(
-                Invite)
-                var InvitedBy=this.state.Invites;
+                MembersOf.push(Invite)
+                InvitedBy=this.state.Invites;
                 InvitedBy.splice(index,1);
-                firestore().collection('Users').doc(this.props.route.params.UserID).update({
+                transaction.update(UserDoc,{
                     MembersOf: MembersOf,
                     InvitedBy: InvitedBy
                 })
-                this.setState({Invites: InvitedBy});
-            })
+        }).then(()=>{
+            this.setState({Invites: InvitedBy});
+        }).catch((err)=>{
+            console.log(err);
+            Alert.alert("","Please check your network connection");
         })
     }
     RemoveUser=(index)=>{

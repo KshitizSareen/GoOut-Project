@@ -56,9 +56,6 @@ class SignIn extends Component{
     GetInfo= async ()=>{
     }
     SignIn=  ()=>{
-        NetInfo.fetch().then((state)=>{
-            if(state.isConnected)
-            {
                 if(this.state.username!=""  && this.state.password!="")
                 {
                     var docid="";
@@ -91,12 +88,6 @@ class SignIn extends Component{
             else{
                 Alert.alert("","Please enter all the details");
             }
-            }
-            else
-            {
-                Alert.alert("","Please connect to the internet");
-            }
-        });
     }
     GenerateSubstrings=(Names)=>{
         var UserSubstrings=[];
