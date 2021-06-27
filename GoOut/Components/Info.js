@@ -101,15 +101,17 @@ class Info extends Component{
             StorageRef.putFile(Image.path).on(
                 storage.TaskEvent.STATE_CHANGED,
                 snapshot=>{
-                    this.ShowAnimation(true);
                     if(snapshot.state==storage.TaskState.SUCCESS)
                     {
                         StorageRef.getDownloadURL().then(downloadUrl=>{
-                            firestore().collection('Users').doc(this.props.route.params.userid).update({
-                                Image: downloadUrl
+                            var UserDoc=firestore().collection('Users').doc(this.props.route.params.userid);
+                            firestore().runTransaction(async transaction=>{
+                                transaction.update(UserDoc,{
+                                    Image: downloadUrl
+                                })
+                            }).then(()=>{
+                                this.setState({uri: downloadUrl});
                             })
-                            this.setState({uri: downloadUrl});
-                            this.ShowAnimation(false);
                         })
                     }
                 }
@@ -119,21 +121,6 @@ class Info extends Component{
 
         })
     }
-    UploadData=()=>{
-        if(this.state.code!="" && this.state.phone!="" && this.state.Username!="")
-        {
-            firestore().collection('Users').doc(this.userid).update({
-                Number: this.state.code+" "+this.state.phone,
-                Username: this.state.Username
-            });
-
-        }
-        else{
-            Alert.alert("","Please enter a mobile number and username");
-        }
-
-
-    }
     ShowAnimation=(value)=>{
         this.setState({ShowLoadingAnimation: value});
     }
@@ -141,29 +128,6 @@ class Info extends Component{
         return true;
     }
     render(){
-        var ShowLoadingAnimation=()=>{
-            if(this.state.ShowLoadingAnimation)
-            {
-                BackHandler.addEventListener('hardwareBackPress',this.HandleBackButton);
-            return(
-                <View style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: '100%',
-                    height: '100%',
-                    alignSelf:'center',
-                    position: 'absolute',
-                    backgroundColor: 'white'
-                }}>
-              <Progress.Circle size={80} indeterminate={true} />
-              </View>
-            )
-                  }
-                  else
-                  {
-                    BackHandler.removeEventListener('hardwareBackPress',this.HandleBackButton);
-                  }
-        }
         return(
             <View style={styles.Background}>
                 <TouchableOpacity style={styles.ImageContainer} onPress={()=>{
@@ -187,20 +151,12 @@ class Info extends Component{
                         </View>
                         
                     <View style={styles.ButtonContainer}>
-                    <TouchableOpacity style={styles.Button} onPress={()=>{
-                        this.ConfirmChanges();
-            }}>
-                <Text style={styles.Text3}>Confirm Changes</Text>
-            </TouchableOpacity>
             <TouchableOpacity style={styles.Button} onPress={()=>{
                 this.SignOut();
             }}>
                 <Text style={styles.Text3}>Logout</Text>
             </TouchableOpacity>
             </View>
-            {
-                    ShowLoadingAnimation()
-                }
                 </View>
         )
     }

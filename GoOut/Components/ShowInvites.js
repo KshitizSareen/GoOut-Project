@@ -36,14 +36,14 @@ class ShowInvites extends Component{
         })
     }
     GetExternalData=()=>{
+        var Images=[];
+        var UserNames=[];
         for(var i=0;i<this.state.Invites.length;i++)
         {
             var UserID=this.state.Invites[i];
         firestore().collection('Users').doc(UserID).get().then(doc=>{
-            var Images=this.state.Images;
             Images.push(doc.data().Image);
             this.setState({Images: Images});
-            var UserNames=this.state.UserNames;
             UserNames.push(doc.data().Username);
             this.setState({UserNames: UserNames});
         })
@@ -51,7 +51,10 @@ class ShowInvites extends Component{
     }
    RemoveUser=(index)=>{
         var Invites=this.state.Invites;
-                firestore().collection('Users').doc(Invites[index]).get().then(doc=>{
+        var UserDoc=firestore().collection('Users').doc(Invites[index]);
+        var EventDoc=firestore().collection('Events').doc(this.props.route.params.EventID);
+        firestore().runTransaction(async transaction=>{
+            var doc=await transaction.get(UserDoc);
                     var InvitedBy=[];
                     if(doc.data().InvitedBy!=null)
                     {
@@ -63,19 +66,37 @@ class ShowInvites extends Component{
                         if(InvitedBy[i]==this.props.route.params.EventID)
                         {
                             Eventindex=i;
+                            InvitedBy.splice(Eventindex,1);
                             break;
                         }
                     }
-                    InvitedBy.splice(Eventindex,1);
-                    firestore().collection('Users').doc(doc.id).update({
+                    transaction.update(UserDoc,{
                         InvitedBy: InvitedBy
                     })
+                    var Event=await transaction.get(EventDoc);
+                    if(Event.data().Invites!=null)
+                    {
+                        Invites=Event.data().Invites;
+                    }
+                    var UserIndex;
+                    for(var i=0;i<Invites.length;i++)
+                    {
+                        if(Invites[i]==Invites[index])
+                        {
+                            UserIndex=i;
+                            Invites.splice(UserIndex,1);
+                            break;
+                        }
+                    }
+                    transaction.update(EventDoc,{
+                        Invites: Invites
+                    })
+                }).then(()=>{
+                    this.FetchInvites();
+                }).catch(err=>{
+                    console.log(err);
+            Alert.alert("","Please check your network connection");
                 })
-                Invites.splice(index,1);
-                firestore().collection('Events').doc(this.props.route.params.EventID).update({
-                   Invites: Invites
-                })
-                this.setState({Invites: Invites});
     }
 
     render(){

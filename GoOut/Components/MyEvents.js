@@ -39,36 +39,43 @@ class MyEvents extends Component{
        })
     }
     GetExternalData=()=>{
+        var Images=[];
+        var EventNames=[];
         for(var i=0;i<this.state.Events.length;i++)
         {
             var EventID=this.state.Events[i];
         firestore().collection('Events').doc(EventID).get().then(doc=>{
-            var Images=this.state.Images;
             Images.push(doc.data().ImageUri);
             this.setState({Images: Images});
-            var EventNames=this.state.EventNames;
             EventNames.push(doc.data().Name);
             this.setState({EventNames: EventNames});
         })
     }
     }
     ExitEvent=(Event)=>{
-            var MembersOf=this.state.Events;
+        var UserDoc=firestore().collection('Users').doc(this.props.route.params.UserID);
+        var EventDoc=firestore().collection('Events').doc(Event);
+        var MembersOf=[];
+        firestore().runTransaction(async transaction=>{
+            var User=await transaction.get(UserDoc);
+            if(User.data().MembersOf!=null)
+            {
+                MembersOf=User.data().MembersOf;
+            }
             var Eventindex;
             for(var i=0;i<MembersOf.length;i++)
             {
                 if(MembersOf[i]==Event)
                 {
                     Eventindex=i;
+                    MembersOf.splice(Eventindex,1);
                     break;
                 }
             }
-            MembersOf.splice(Eventindex,1);
-            firestore().collection('Users').doc(this.props.route.params.UserID).update({
+            transaction.update(UserDoc,{
                 MembersOf: MembersOf
             })
-            this.setState({Events: MembersOf});
-        firestore().collection('Events').doc(Event).get().then(doc=>{
+            var doc=await transaction.get(EventDoc);
             var Members=[]
             if(doc.data().Members!=null)
             {
@@ -80,13 +87,18 @@ class MyEvents extends Component{
                 if(Members[i]==this.props.route.params.UserID)
                 {
                     UserIndex=i;
+                    Members.splice(UserIndex,1);
                     break;
                 }
             }
-            Members.splice(UserIndex,1);
-            firestore().collection('Events').doc(Event).update({
+            transaction.update(EventDoc,{
                 Members: Members
             })
+        }).then(()=>{
+             this.GetEvents();
+        }).catch(err=>{
+            console.log(err);
+            Alert.alert("","Please check your network connection");
         })
     }
     componentWillUnmount(){

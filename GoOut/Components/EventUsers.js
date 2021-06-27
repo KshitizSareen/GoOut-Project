@@ -13,7 +13,6 @@ const windowHeight = Dimensions.get('window').height;
 import FastImage from 'react-native-fast-image';
 import auth from '@react-native-firebase/auth';
 import messaging from '@react-native-firebase/messaging';
-import { ThemeProvider } from '@react-navigation/native';
 const axios = require('axios').default ;
 
 class EventUsers extends Component{
@@ -55,31 +54,32 @@ class EventUsers extends Component{
         }
     }
     AddUser=(User,index)=>{
-                  var InvitedEvents=[];
-                  if(User.data().InvitedBy!=null)
+        var UserDoc=firestore().collection('Users').doc(User.id);
+        var EventDoc=firestore().collection('Events').doc(this.props.eventid);
+        firestore().runTransaction(async transaction=>{
+            var UserData=await transaction.get(UserDoc);
+            var InvitedEvents=[];
+                  if(UserData.data().InvitedBy!=null)
                   {
-                      InvitedEvents=User.data().InvitedBy;
+                      InvitedEvents=UserData.data().InvitedBy;
                   }
                   InvitedEvents.push(this.props.eventid);
-                  firestore().collection('Users').doc(User.id).update({
-                      InvitedBy: InvitedEvents
-                  }).then(()=>{
-                      this.SearchUsers(this.state.Username);
-                  }).then(()=>{
-
-                      firestore().collection('Events').doc(this.props.eventid).get().then((Event)=>{
-                          var Invites=[];
+                  transaction.update(UserDoc,{
+                    InvitedBy: InvitedEvents
+                  })
+                  var Event=await transaction.get(EventDoc);
+                  var Invites=[];
                           if(Event.data().Invites!=null)
                           {
                               Invites=Event.data().Invites;
                           }
                           Invites.push(User.id);
-                          firestore().collection('Events').doc(this.props.eventid).update({
-                              Invites: Invites
+                          transaction.update(EventDoc,{
+                            Invites: Invites
                           })
-                      })
-                  }).then(()=>{
-                    axios.post("https://fcm.googleapis.com/fcm/send",{
+        }).then(()=>{
+            this.SearchUsers(this.state.Username);
+                    /*axios.post("https://fcm.googleapis.com/fcm/send",{
                         "to" : User.data().NotificationToken,
            "notification" : {
                "body" : "You have been invited to "+this.props.EventName+"\n"+"Check your app for invites",
@@ -93,13 +93,19 @@ class EventUsers extends Component{
                           Authorization: "key=AAAA7tNMKV0:APA91bEZHjBk7k1YayjyS_7HrM8rznxOyH-_1GHWH58hqyvmVMoBPMCCsQ23G-9W16gJhh2RyDVE4qSWn5y2QiX3MG39hv1javY_34IJNE5PpWdMKa-QHSXaXop8nxpZc5-VsP2OTzXd",
                           "Content-Type": "application/json"
                         },
-                    })
-                  })
+                    })*/
+        }).catch(err=>{
+            console.log(err);
+            Alert.alert("","Please check your network connection");
+        })
     }
     RemoveUser=(index)=>{
         var User=this.state.Users[index];
-            firestore().collection('Users').doc(User.id).get().then(user=>{
+        var UserDoc=firestore().collection('Users').doc(User.id);
+        var EventDoc=firestore().collection('Events').doc(this.props.eventid);
+            firestore().runTransaction(async transaction=>{
                 var InvitedEvents=[];
+                var user=await transaction.get(UserDoc);
                 if(user.data().InvitedBy!=null)
                 {
                     InvitedEvents=user.data().InvitedBy;
@@ -110,17 +116,15 @@ class EventUsers extends Component{
                     if(InvitedEvents[i]==this.props.eventid)
                     {
                         eventIndex=i;
+                        InvitedEvents.splice(eventIndex,1);
                         break;
                     }
                 }
-                InvitedEvents.splice(eventIndex,1);
-                firestore().collection('Users').doc(User.id).update({
+                transaction.update(UserDoc,{
                     InvitedBy: InvitedEvents
-                }).then(()=>{
-                    this.SearchUsers(this.state.Username);
-                }).then(()=>{
-                    firestore().collection('Events').doc(this.props.eventid).get().then((Event)=>{
-                        var Invites=[];
+                })
+                var Event=await transaction.get(EventDoc);
+                var Invites=[];
                         if(Event.data().Invites!=null)
                         {
                             Invites=Event.data().Invites;
@@ -131,16 +135,16 @@ class EventUsers extends Component{
                     if(Invites[i]==User.id)
                     {
                         UserIndex=i;
+                        Invites.splice(UserIndex,1);
                         break;
                     }
                 }
-                Invites.splice(UserIndex,1);
-                        firestore().collection('Events').doc(this.props.eventid).update({
-                            Invites: Invites
-                        })
-                    })
-                }).then(()=>{
-                    axios.post("https://fcm.googleapis.com/fcm/send",{
+                transaction.update(EventDoc,{
+                    Invites: Invites
+                })
+            }).then(()=>{
+                this.SearchUsers(this.state.Username);
+                    /*axios.post("https://fcm.googleapis.com/fcm/send",{
               "to" : User.data().NotificationToken,
  "data":{
 
@@ -151,7 +155,10 @@ class EventUsers extends Component{
                 "Content-Type": "application/json"
               },
           })
-                })
+            }).catch(err=>{
+                console.log(err);
+            Alert.alert("","Please check your network connection");
+            */
             })
     }
     render(){

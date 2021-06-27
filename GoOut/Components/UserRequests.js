@@ -39,22 +39,25 @@ class UserRequests extends Component{
         })
     }
     GetExternalData=()=>{
+        var Images=[];
+        var EventNames=[];
         for(var i=0;i<this.state.Requests.length;i++)
         {
             var EventID=this.state.Requests[i];
         firestore().collection('Events').doc(EventID).get().then(doc=>{
-            var Images=this.state.Images;
             Images.push(doc.data().ImageUri);
             this.setState({Images: Images});
-            var EventNames=this.state.EventNames;
             EventNames.push(doc.data().Name);
             this.setState({EventNames: EventNames});
         })
     }
     }
     RemoveUser=(Event)=>{
-        firestore().collection('Users').doc(this.props.route.params.UserID).get().then(doc=>{
-            var UserRequests=[];
+        var UserDoc=firestore().collection('Users').doc(this.props.route.params.UserID);
+        var EventDoc=firestore().collection('Events').doc(Event);
+        var UserRequests=this.state.Requests;
+        firestore().runTransaction(async transaction=>{
+            var doc=await transaction.get(UserDoc);
             if(doc.data().UserRequests!=null)
             {
                 UserRequests=doc.data().UserRequests;
@@ -69,12 +72,10 @@ class UserRequests extends Component{
                     break;
                 }
             }
-            firestore().collection('Users').doc(this.props.route.params.UserID).update({
+            transaction.update(UserDoc,{
                 UserRequests: UserRequests
             })
-            this.setState({Requests: UserRequests});
-        })
-        firestore().collection('Events').doc(Event).get().then(doc=>{
+            doc=await transaction.get(EventDoc);
             var EventRequests=[];
             if(doc.data().EventRequests!=null)
             {
@@ -90,9 +91,14 @@ class UserRequests extends Component{
                     break;
                 }
             }
-            firestore().collection('Events').doc(Event).update({
+            transaction.update(EventDoc,{
                 EventRequests: EventRequests
             })
+        }).then(()=>{
+            this.GetUserRequests();
+        }).catch(err=>{
+            console.log(err);
+            Alert.alert("","Please check your network connection");
         })
     }
 

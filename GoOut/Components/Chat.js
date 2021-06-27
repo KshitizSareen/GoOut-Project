@@ -37,6 +37,7 @@ class Chat extends Component{
         };
       }
     componentDidMount(){
+        this.message="";
         this.GetMessages();
         firestore().collection('Users').doc(this.props.userid).get().then((doc)=>{
             if(doc.exists)
@@ -47,64 +48,39 @@ class Chat extends Component{
             }
         })
         messaging().onMessage( async msg=>{
-            his.GetMessages();
+            this.GetMessages();
         })
     }
-    SendMessage=(type)=>{
-        NetInfo.fetch().then((state)=>{
-            if(state.isConnected)
-            {
-                    if(this.state.Message!="")
+    SendMessage=(Message)=>{
+                    if(Message!="")
         {
 
                 var Messages=this.state.Messages;
-                    Messages.unshift({Message:this.state.Message.trim(),User:this.state.User,type: 0});
-                    this.setState({Message:""});
-                firestore().collection('Events').doc(this.props.eventid).update({
-                    Messages: Messages
-                }).then(()=>{
-                    firestore().collection('Events').doc(this.props.eventid).get().then((doc)=>{
-                        if(doc.exists)
+                Messages.unshift({Message:Message.trim(),User:this.state.User,type: 0});
+                        this.setState({Messages: Messages});
+                    var EventDoc=firestore().collection('Events').doc(this.props.eventid);
+                    firestore().runTransaction(async transaction=>{
+                        var doc= await transaction.get(EventDoc);
+                        if('Messages' in doc.data())
                         {
-                            if ('Messages' in doc.data())
-                            {
-                                this.setState({Messages: doc.data().Messages});
-                            }
+                            Messages=doc.data().Messages;
                         }
+                        else
+                        {
+                            Messages=[];
+                        }
+                        Messages.unshift({Message:Message.trim(),User:this.state.User,type: 0});
+                        transaction.update(EventDoc,{
+                            Messages: Messages
+                        })
+                    }).then(()=>{
+                    }).catch(err=>{
+                        console.log(err);
+            Alert.alert("","Please check your network connection");
                     })
-                })
             }
-        }
-        else
-            {
-                Alert.alert("","Please connect to the internet");
-            }});
     }
     GetMessages=()=>{
-        firestore().collection('Events').doc(this.props.eventid).get().then((doc)=>{
-            if(doc.exists)
-            {
-                if ('Messages' in doc.data())
-                {
-                    this.setState({Messages: doc.data().Messages});
-                }
-            }
-        })
-    }
-    UploadPhoto= ()=>{
-        this.setState({modalUploadVisible: false});
-        ImagePicker.openPicker({
-            multiple: true,
-          }).then(images => {
-              this.props.ShowAnimation(false);
-              this.props.navigation.navigate("Image Editing",{Images:images,SendMessage: this.SendMediaMessage,UserId:this.props.userid,eventid: this.props.eventid,User: this.state.User,FromMedia: false});
-              }).catch(err=>{
-                this.props.ShowAnimation(false);
-              })
-              this.props.ShowAnimation(true);
-              
-    }
-    SendMediaMessage=()=>{
         firestore().collection('Events').doc(this.props.eventid).get().then((doc)=>{
             if(doc.exists)
             {
@@ -118,7 +94,6 @@ class Chat extends Component{
     UploadPDF= async ()=>{
         try {
             this.setState({modalUploadVisible: false});
-            this.props.ShowAnimation(true);
             var ResultUris=new Array();
             const results = await DocumentPicker.pickMultiple({
               type: [DocumentPicker.types.allFiles],
@@ -138,9 +113,6 @@ class Chat extends Component{
             }
             const SendPDFInterval=setInterval(()=>{
                 if(ResultUris.length==results.length)
-            {
-            NetInfo.fetch().then(state=>{
-               if(state.isConnected)
             {
              var Messages=[];
              var Message=[];
@@ -171,122 +143,55 @@ class Chat extends Component{
                       if(Set.length==ResultUris.length)
                       {
                           console.log("Twice");
-                          firestore().collection('Events').doc(this.props.eventid).get().then(res=>{
+                          var EventDoc=firestore().collection('Events').doc(this.props.eventid);
+                          firestore().runTransaction(async transaction=>{
+                              var res=await transaction.get(EventDoc);
                               if ('Messages' in res.data())
                               {
                                   Messages=res.data().Messages;
 
                               }
-                              Messages.unshift({Message:Message,User:this.state.User,type: 2});
-                          }).then(()=>{
-                            firestore().collection('Events').doc(this.props.eventid).update({
+                              Messages.unshift({Message:Message,User:this.state.User,type: 1});
+                              transaction.update(EventDoc,{
                                 Messages: Messages
-                            }).then(()=>{
-                                this.props.ShowAnimation(false);
-                                this.SendMediaMessage();
-                            });
-
-                          })
+                              })
+                          }).then(()=>{
+                            }).catch(err=>{
+                                console.log(err);
+            Alert.alert("","Please check your network connection");
+                            })
                       }
                         }
+                    }).catch(err=>{
+                        console.log(err);
+                        Alert.alert("","Please check your network connection");
                     })
+                  }
+                  if(snapshot.state==storage.TaskState.ERROR)
+                  {
+                    console.log(err);
+                    Alert.alert("","Please check your network connection");
                   }
                 },
                 error=>{
                   console.log("image upload error"+ error);
                 },
+
                 )
               })
-              }
-            else
-            {
-                Alert.alert("","Please connect to the internet");
-            }
-            })
             clearInterval(SendPDFInterval);
         }
             },1000);
           } catch (err) {
             if (DocumentPicker.isCancel(err)) {
               // User cancelled the picker, exit any dialogs or menus and move on
-              this.props.ShowAnimation(false);
-              BackHandler.removeEventListener('hardwareBackPress',this.HandleBackButton);
             } else {
               throw err;
             }
           }
 
     }
-    HandleBackButton(){
-        return true;
-    }
-    UploadImage=(fileName,filepath,index,finalindex)=>{
-                    const userid=this.props.userid;
-    var storageRef=storage().ref(`ChatImages/${userid}/${fileName}`);
-    storageRef.putFile(filepath).on(
-      storage.TaskEvent.STATE_CHANGED,
-      snapshot=>{
-        console.log("snapshot: "+snapshot.state);
-        console.log("progress: "+(snapshot.bytesTransferred/snapshot.totalBytes)*100);
-        if(snapshot.state==storage.TaskState.SUCCESS){
-          console.log("Success");
-          storageRef.getDownloadURL().then(downloadurl=>{
-              var ImageUrls=this.state.ImageUrls;
-              ImageUrls.push(downloadurl);
-              this.setState({ImageUrls:ImageUrls});
-          }).then(()=>{
-              return "Completed";
-          });
-        }
-      },
-      error=>{
-        console.log("image upload error"+ error);
-      });
-    }
-    SetModalUploadVisible=()=>{
-        if (this.state.modalUploadVisible)
-        this.setState({modalUploadVisible: false});
-        else
-        this.setState({modalUploadVisible: true});
-    }
-    SetModalCaptionVisible=()=>{
-        if(this.state.modalCaptionVisible)
-        {
-            this.setState({modalCaptionVisible: false});
-        }
-        else{
-            this.setState({modalCaptionVisible: true});
-        }
-    }
     render(){
-        var ShowModel=()=>{
-            return(
-                <Modal
-                animationType="slide"
-                transparent={true}
-                visible={this.state.modalUploadVisible}
-                onRequestClose={() => {
-                    this.SetModalUploadVisible();
-                }}
-                onBackdropPress={()=>{
-                    this.SetModalUploadVisible();
-                }}
-              >
-                <View style={styles.centeredView} >
-                  <View style={styles.modalView}>
-                      <View style={styles.modalInnerView}>
-                   <TouchableOpacity onPress={()=>{
-                        this.UploadPhoto();
-                   }}><FontAwesomeIcon icon={faImage} size="30" style={styles.IconsUpload} color="lightblue"/></TouchableOpacity>
-    <TouchableOpacity onPress={()=>{
-        this.UploadPDF();
-    }}><FontAwesomeIcon icon={faFile} size="30" color="lightblue"/></TouchableOpacity>
-    </View>
-                  </View>
-                </View>
-              </Modal>
-            );
-        }
         return(
             <View style={{
                 flex: 1,
@@ -294,9 +199,6 @@ class Chat extends Component{
                 alignItems: 'center'
             }}
             enabled={true}>
-                {
-                    ShowModel()
-                }
                 <FlatList style={styles.Messages} data={this.state.Messages} renderItem={(data)=>{
                     if(data.item.type==0)
                     {
@@ -307,45 +209,8 @@ class Chat extends Component{
                         </View>
                     )
                     }
+       
                     else if(data.item.type==1)
-                    {
-                        return(
-                        <View style={styles.Message}>
-                            <Text style={styles.TextName}>{data.item.User.Name}</Text>
-                            <View style={{
-                                flexDirection: 'row',
-                                alignItems: 'center'
-                            }}>
-                            <TouchableOpacity style={{
-                                width: 0.1*windowWidth,
-                                margin: '1%'
-                                
-                            }} onPress={()=>{
-                                NetInfo.fetch().then((state)=>{
-                                    if(state.isConnected)
-                                    {
-                                        this.props.navigation.navigate("PlayMedia",{Message:data.item.Message});
-                                    }
-                                    else
-                                    {
-                                       Alert.alert("","Please connect to the internet")
-                                    }
-                                })
-                            }}>
-                                <FontAwesomeIcon icon={faPlay} size="40" color="lightblue" style={{
-                                }}/>
-                                </TouchableOpacity>
-                                <Text style={{
-                                    fontSize: 25,
-                                    fontFamily: 'serif',
-                                    fontWeight: '800',
-                                    fontStyle: 'italic'
-                                }}>Play Media</Text>
-                            </View>
-                        </View>
-                        )
-                    }
-                    else if(data.item.type==2)
                     {
                         return(
                         <View style={styles.Message}>
@@ -385,14 +250,17 @@ class Chat extends Component{
                     }
                 }} keyExtractor={data=>data.item}/>
                 <View style={styles.Chat}>
-                <TextInput multiline={true} style={styles.ChatInput} value={this.state.Message}  onChangeText={(value)=>{
-                    this.setState({Message: value});
+                <TextInput multiline={true} style={styles.ChatInput} value={this.state.Message}  onChange={(value)=>{
+                    this.message=value.nativeEvent.text;
+                    this.setState({Message: value.nativeEvent.text});
                 }} value={this.state.Message}/>
                 <TouchableOpacity style={styles.UploadButton} onPress={()=>{
-                    this.SetModalUploadVisible();
+                    this.UploadPDF();
                 }}><FontAwesomeIcon icon={faUpload} size="40" color="lightblue" style={styles.Icons}/></TouchableOpacity>
                 <TouchableOpacity style={styles.UploadButton} onPress={()=>{
-                    this.SendMessage(0);
+                    this.SendMessage(this.message);
+                    this.setState({Message: ""});
+                    this.message="";
                 }}><FontAwesomeIcon icon={faArrowAltCircleRight} size="40" color="lightblue" style={styles.Icons}/></TouchableOpacity>
                 </View>
             </View>

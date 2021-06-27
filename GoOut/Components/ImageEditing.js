@@ -219,7 +219,6 @@ class ImageEditing extends Component{
 
       SendImage=()=>{
           console.log(ImageArray);
-          BackHandler.addEventListener('hardwareBackPress',this.HandleBackButton);
        NetInfo.fetch().then((state)=>{
             if(state.isConnected)
             {
@@ -271,7 +270,6 @@ class ImageEditing extends Component{
                                 this.props.route.params.SendMessage();
                                 this.setState({ShowIndicator: false});
                                 this.props.navigation.goBack();
-                                BackHandler.removeEventListener('hardwareBackPress',this.HandleBackButton);
                             });
 
                           })
@@ -294,7 +292,6 @@ class ImageEditing extends Component{
                                     this.props.route.params.LoadImage();
                                     this.setState({ShowIndicator: false});
                                     this.props.navigation.goBack();
-                                    BackHandler.removeEventListener('hardwareBackPress',this.HandleBackButton);
                                 })
                             })
                         }

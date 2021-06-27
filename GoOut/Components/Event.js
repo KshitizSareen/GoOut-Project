@@ -88,9 +88,6 @@ class EventCreate extends Component{
       this.setState({Free: value});
     }
     UploadData=()=>{
-      NetInfo.fetch().then((state)=>{
-        if(state.isConnected)
-        {
           if(this.state.Name=="" || this.state.Time=="Time" || this.state.Date=="Date")
           {
             Alert.alert("","Please enter Name,Date and Time");
@@ -108,17 +105,14 @@ class EventCreate extends Component{
             Permission: this.state.Permission,
             Owner: this.props.route.params.userid,
             Price: parseInt(this.state.Price),
-            Free: this.state.Free,
             ImageUri: "https://firebasestorage.googleapis.com/v0/b/goout-4391e.appspot.com/o/a1695e7b-5875-4314-bf70-b50c4a0386f3_200x200.png?alt=media&token=8c962cb0-02e9-4f51-bec2-e2699cebcfac",
             SearchArray: this.GenerateSubstrings(this.state.Name.toLowerCase().trim())
           }).then((doc)=>{
             Alert.alert("","Event has been succesfuly created");
+          }).catch(err=>{
+            console.log(err);
+            Alert.alert("","Please check your network connection");
           })
-        }
-        else{
-          Alert.alert("","Please connect to the internet");
-        }
-      })
     }
     GenerateSubstrings=(Name,Tags)=>{
       var Substrings=[];
@@ -151,17 +145,6 @@ class EventCreate extends Component{
     }
       render()
       {
-        var ShowPrice=()=>{
-  
-          if (this.state.Free)
-          {
-          return (
-            <TextInput placeholder="Set Price" placeholderTextColor="grey" style={styleevent.EventPrice} value={this.state.Price} keyboardType="number-pad" onChangeText={(value)=>{
-             this.SetPrice(value);
-            }}/>
-          )
-          }
-        }
 
         var ShowDateTimeModal=()=>{
           return(
@@ -311,13 +294,9 @@ class EventCreate extends Component{
                       this.SetPermission(value);
                     }}/>
                   </View>
-                  <View style={styleevent.CheckBoxView}>
-                    <Text style={styleevent.label}>Set Price</Text>
-                    <CheckBox disabled={false} value={this.state.Free} onValueChange={(value)=>{
-                      this.SetPriceVisible(value);
-                    }}/>
-                  </View>
-                  {ShowPrice()}
+                  <TextInput placeholder="Set Price" placeholderTextColor="grey" style={styleevent.EventPrice} value={this.state.Price} keyboardType="number-pad" onChangeText={(value)=>{
+             this.SetPrice(value);
+            }}/>
                   <TouchableOpacity style={styleevent.Button} onPress={()=>{
                     this.UploadData();
                   }}>
@@ -336,6 +315,7 @@ class EventCreate extends Component{
           flexDirection: 'column',
           justifyContent: 'space-evenly',
           alignItems: 'center',
+          height: windowHeight
         },
         EventName:{
           width: 0.9*windowWidth,

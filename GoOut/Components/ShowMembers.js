@@ -36,14 +36,14 @@ class ShowMembers extends Component{
         })
     }
     GetExternalData=()=>{
+        var Images=[];
+        var UserNames=[];
         for(var i=0;i<this.state.Members.length;i++)
         {
             var UserID=this.state.Members[i];
         firestore().collection('Users').doc(UserID).get().then(doc=>{
-            var Images=this.state.Images;
             Images.push(doc.data().Image);
             this.setState({Images: Images});
-            var UserNames=this.state.UserNames;
             UserNames.push(doc.data().Username);
             this.setState({UserNames: UserNames});
         })
@@ -51,7 +51,10 @@ class ShowMembers extends Component{
     }
    RemoveUser=(index)=>{
         var Members=this.state.Members;
-                firestore().collection('Users').doc(Members[index]).get().then(doc=>{
+        var UserDoc=firestore().collection('Users').doc(Members[index]);
+        var EventDoc=firestore().collection('Events').doc(this.props.route.params.EventID)
+                firestore().runTransaction(async transaction=>{
+                    var doc=await transaction.get(UserDoc);
                     var MembersOf=[];
                     if(doc.data().MembersOf!=null)
                     {
@@ -63,19 +66,37 @@ class ShowMembers extends Component{
                         if(MembersOf[i]==this.props.route.params.EventID)
                         {
                             Eventindex=i;
+                            MembersOf.splice(Eventindex,1);
                             break;
                         }
                     }
-                    MembersOf.splice(Eventindex,1);
-                    firestore().collection('Users').doc(doc.id).update({
+                    transaction.update(UserDoc,{
                         MembersOf: MembersOf
                     })
+                    var Event=await transaction.get(EventDoc);
+                    if(Event.data().Members!=null)
+                    {
+                        Members=Event.data().Members;
+                    }
+                    var UserIndex;
+                    for(var i=0;i<Members.length;i++)
+                    {
+                        if(Members[i]==Members[index])
+                        {
+                            UserIndex=i;
+                            Members.splice(UserIndex,1);
+                            break;
+                        }
+                    }
+                    transaction.update(EventDoc,{
+                        Members: Members
+                    })
+                }).then(()=>{
+                    this.FetchMembers();
+                }).catch(err=>{
+                    console.log(err);
+            Alert.alert("","Please check your network connection");
                 })
-                Members.splice(index,1);
-                firestore().collection('Events').doc(this.props.route.params.EventID).update({
-                    Members: Members
-                })
-                this.setState({Members: Members});
     }
 
     render(){

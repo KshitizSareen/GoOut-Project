@@ -16,18 +16,16 @@ const Tab=createBottomTabNavigator();
           this.GetToken();
       }
       GetToken=()=>{
-        NetInfo.fetch().then(state=>{
-            if(state.isConnected)
-            {
                 messaging().getToken().then(token=>{
                     firestore().collection('Users').doc(this.props.route.params.userid).update({
                         NotificationToken:token
                     }).catch(err=>{
                         console.log(err);
                     })
+                 }).catch(err=>{
+                     console.log(err);
+                     Alert.alert("","Please enter all the details");
                  })
-            }
-        })
     }
       render()
       {

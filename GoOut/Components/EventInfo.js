@@ -108,16 +108,15 @@ class EventInfo extends Component{
       this.setState({Free: value});
     }
     UploadData=()=>{
-      NetInfo.fetch().then((state)=>{
-        if(state.isConnected)
-        {
           if(this.state.Name=="" || this.state.Time=="Time" || this.state.Date=="Date")
           {
             Alert.alert("","Please enter Name,Date and Time");
             return;
           }
-          firestore().collection('Events').doc(this.props.eventid).update({
-            Name: this.state.Name,
+          var EventDoc=firestore().collection('Events').doc(this.props.eventid);
+          firestore().runTransaction(async transaction=>{
+            transaction.update(EventDoc,{
+              Name: this.state.Name,
             Tags: this.state.Tags,
             Location: this.state.Location,
             Date: this.state.Date,
@@ -128,15 +127,13 @@ class EventInfo extends Component{
             Permission: this.state.Permission,
             Owner: this.props.userid,
             Price: parseInt(this.state.Price),
-            Free: this.state.Free
+            })
           }).then(()=>{
-            Alert.alert("","Event has been succesfuly updated");
+            Alert.alert("","Event Succesfully Updated");
+          }).catch(err=>{
+            console.log(err);
+            Alert.alert("","Please check your network connection");
           })
-        }
-        else{
-          Alert.alert("","Please connect to the internet");
-        }
-      })
     }
 
     ShowTagModal=(value)=>{
@@ -155,17 +152,6 @@ class EventInfo extends Component{
     }
       render()
       {
-        var ShowPrice=()=>{
-  
-          if (this.state.Free)
-          {
-          return (
-            <TextInput editable={this.props.userid==this.props.OwnerId} placeholder="Set Price" placeholderTextColor="grey" style={styleevent.EventPrice} value={this.state.Price.toString()} keyboardType="number-pad" onChangeText={(value)=>{
-             this.SetPrice(value);
-            }}/>
-          )
-          }
-        }
 
         var ShowDateTimeModal=()=>{
           return(
@@ -301,6 +287,11 @@ class EventInfo extends Component{
                     this.SetTo(value);
                   }}/>
                   </View>
+                  {
+                   this.props.userid==this.props.OwnerId ?  
+                   <View style={{
+                     alignItems: 'center'
+                   }}>
                   <View style={styleevent.CheckBoxView}>
                     <Text style={styleevent.label}>Keep Public</Text>
                     <CheckBox disabled={this.props.userid!=this.props.OwnerId} value={this.state.Public} onValueChange={(value)=>{
@@ -313,13 +304,11 @@ class EventInfo extends Component{
                       this.SetPermission(value);
                     }}/>
                   </View>
-                  <View style={styleevent.CheckBoxView}>
-                    <Text style={styleevent.label}>Set Price</Text>
-                    <CheckBox disabled={this.props.userid!=this.props.OwnerId} value={this.state.Free} onValueChange={(value)=>{
-                      this.SetPriceVisible(value);
-                    }}/>
-                  </View>
-                  {ShowPrice()}
+                  </View> : null
+                  }
+                   <TextInput editable={this.props.userid==this.props.OwnerId} placeholder="Set Price" placeholderTextColor="grey" style={styleevent.EventPrice} value={this.state.Price.toString()} keyboardType="number-pad" onChangeText={(value)=>{
+             this.SetPrice(value);
+            }}/>
                 {
                   this.props.userid==this.props.OwnerId ?
                   <TouchableOpacity style={styleevent.Button} onPress={()=>{
@@ -437,7 +426,7 @@ class EventInfo extends Component{
         marginBottom: '5%',
         fontSize: 20,
         padding: '1%',
-        width: 375,
+        width: 0.9*windowWidth,
         fontSize: 20,
         color: 'grey'
 

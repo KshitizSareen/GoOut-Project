@@ -4,6 +4,8 @@ import { View,StyleSheet,Text, Alert, TouchableOpacity,FlatList, Dimensions} fro
 import * as Progress from 'react-native-progress';
 import RNFetchBlob from 'rn-fetch-blob';
 import FileViewer from 'react-native-file-viewer';
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 class LoadDocuments extends Component{
     constructor(){
         super();
@@ -21,22 +23,21 @@ class LoadDocuments extends Component{
     }
     render(){
         return(
-            <View>
+            <View style={{
+                alignItems: 'center',
+                justifyContent: 'center' 
+                           }}>
                 <FlatList data={this.props.route.params.Message} renderItem={(data)=>{
                     return(
-                            <View >
                                  <TouchableOpacity disabled={this.state.ShowLoadingIndicator[data.index]} style={{
                                      flexDirection: 'row',
                                      backgroundColor: 'lightblue',
                                      justifyContent: 'space-between',
                                      borderRadius: 50,
                                      padding: '3%',
-                                     margin: '5%',
-                                     
+                                     width: 0.95*windowWidth,
+                                     marginTop: '3%'
                                  }} onPress={()=>{
-                                     NetInfo.fetch().then((state)=>{
-                                         if(state.isConnected)
-                                         {
                                              RNFetchBlob.fs.exists(RNFetchBlob.fs.dirs.DocumentDir+'/'+data.item.FilePath).then(async res=>{
                                                  if(res==true)
                                                  {
@@ -69,30 +70,24 @@ class LoadDocuments extends Component{
                                                     })
                                                  }
                                              })
-                                         }
-                                         else
-                                         {
-                                            Alert.alert("","Please connect to the internet")
-                                         }
-                                     })
                                  }}>
                                      <Text style={{
                                          fontSize: 20,
                                          fontFamily: 'serif',
                                          fontWeight: '800',
                                          fontStyle: 'italic',
-                                         margin: '1%'
+                                         margin: '1%',
+                                         width: 0.7*windowWidth
                                      }}>{data.item.FileName}</Text>
                                      {
                                          this.state.ShowLoadingIndicator[data.index]==true ? <Progress.Circle size={40} indeterminate={true} style={{
-                                             margin: '1%'
+                                             margin: '3%'
                                         }}/> : null
                                      }
                                      </TouchableOpacity>
-                                 </View>
                     )
                 }}/>
-            </View>
+                </View>
         )
     }
 

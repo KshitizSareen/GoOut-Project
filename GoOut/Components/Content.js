@@ -45,7 +45,6 @@ class Content extends Component{
       }
     componentDidMount(){
         userid=this.props.route.params.userid;
-        console.log(userid);
         NetInfo.fetch().then((state)=>{
             if(state.isConnected)
             {
@@ -57,7 +56,6 @@ class Content extends Component{
                         this.setState({Price:doc.data().Price});
                         this.setState({Date: doc.data().Date});
                         this.setState({ImageUri: doc.data().ImageUri});
-                        this.GetOwner(doc.data().Owner);
                         this.setState({OwnerID: doc.data().Owner});
                         if(doc.data().Members!=null)
                         {
@@ -85,48 +83,6 @@ class Content extends Component{
             }
         })
 
-    }
-
-    GetOwner=(OnwerID)=>{
-        NetInfo.fetch().then(state=>{
-            if(state.isConnected)
-            {
-                firestore().collection('Users').doc(OnwerID).get().then(doc=>{
-                    if(doc.exists)
-                    {
-                        this.setState({Ownername: doc.data().Username});
-                    }
-                })
-            }
-        })
-    }
-
-    SelectImage=()=>{
-        ImagePicker.openPicker({
-            cropping: true,
-            mediaType: 'photo'
-        }).then((Image)=>{
-            var StorageRef=storage().ref(`Event/Data/${this.props.route.params.eventid}/ImagePic`);
-            StorageRef.putFile(Image.path).on(
-                storage.TaskEvent.STATE_CHANGED,
-                snapshot=>{
-                    this.ShowAnimation(true);
-                    if(snapshot.state==storage.TaskState.SUCCESS)
-                    {
-                        StorageRef.getDownloadURL().then(downloadUrl=>{
-                            firestore().collection('Events').doc(this.props.route.params.eventid).update({
-                                ImageUri: downloadUrl
-                            })
-                            this.setState({ImageUri: downloadUrl});
-                            this.ShowAnimation(false);
-                        })
-                    }
-                }
-            )
-
-        }).catch(err=>{
-
-        })
     }
       SetChat=()=>{
 
@@ -171,7 +127,10 @@ class Content extends Component{
         return true;
     }
     EnterEvent=()=>{
-        firestore().collection('Users').doc(this.props.route.params.userid).get().then(doc=>{
+        var UserDoc=firestore().collection('Users').doc(this.props.route.params.userid);
+        var EventDoc=firestore().collection('Events').doc(this.props.route.params.eventid);
+        firestore().runTransaction(async transaction=>{
+            var doc=await transaction.get(UserDoc);
             var UserRequests=[];
             console.log(UserRequests);
             if(doc.data().UserRequests!=null)
@@ -179,49 +138,32 @@ class Content extends Component{
                 UserRequests=doc.data().UserRequests;
             }
             UserRequests.push(this.props.route.params.eventid);
-            firestore().collection('Users').doc(this.props.route.params.userid).update({
+            transaction.update(UserDoc,{
                 UserRequests: UserRequests
             })
-        })
-        firestore().collection('Events').doc(this.props.route.params.eventid).get().then(doc=>{
+            doc=await transaction.get(EventDoc);
             var EventRequests=[]
             if(doc.data().EventRequests!=null)
             {
                 EventRequests=doc.data().EventRequests;
             }
             EventRequests.push(this.props.route.params.userid)
-            firestore().collection('Events').doc(this.props.route.params.eventid).update({
+            transaction.update(EventDoc,{
                 EventRequests: EventRequests
             })
+        }).then(()=>{
+
+        }).catch(err=>{
+            console.log(err);
+            Alert.alert("","Please check your network connection");
         })
+
     }
                 
     componentWillUnmount(){
     }
     render()
     {
-        var ShowLoadingAnimation=()=>{
-            if(this.state.ShowLoadingAnimation)
-            {
-                BackHandler.addEventListener('hardwareBackPress',this.HandleBackButton);
-            return(
-                <View style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: '100%',
-                    height: '100%',
-                    alignSelf:'center',
-                    overflow: 'visible'
-                }}>
-              <Progress.Circle size={80} indeterminate={true} />
-              </View>
-            )
-                  }
-                  else
-                  {
-                    BackHandler.removeEventListener('hardwareBackPress',this.HandleBackButton);
-                  }
-        }
           
      var ShowPice=()=>{
          if(this.state.Price!=0)
@@ -274,9 +216,6 @@ class Content extends Component{
     }   
         return(
             <View style={styles.Background}>
-                {
-                ShowLoadingAnimation()
-                }
                 <View style={styles.Description}>
                     <View style={{
                         width: 0.5*windowWidth,
@@ -323,7 +262,7 @@ class Content extends Component{
                     </TouchableOpacity>
                 </View>
                 {
-                    this.state.OwnerID!=this.props.route.params.userid && !this.state.Members.includes(this.props.route.params.userid) && this.state.EventRequests.includes(this.props.route.params.userid) && this.state.Invites.includes(this.props.route.params.userid)  ? 
+                    this.state.OwnerID!=this.props.route.params.userid && !this.state.Members.includes(this.props.route.params.userid) && !this.state.EventRequests.includes(this.props.route.params.userid) && !this.state.Invites.includes(this.props.route.params.userid)  ? 
                     <TouchableOpacity onPress={()=>{
     this.EnterEvent();
 }}>

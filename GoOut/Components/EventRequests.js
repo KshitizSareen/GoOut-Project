@@ -39,21 +39,25 @@ class EventRequests extends Component{
         })
     }
     GetExternalData=()=>{
+        var Images=[];
+        var UserNames=[];
         for(var i=0;i<this.state.Requests.length;i++)
         {
             var UserID=this.state.Requests[i];
         firestore().collection('Users').doc(UserID).get().then(doc=>{
-            var Images=this.state.Images;
             Images.push(doc.data().Image);
             this.setState({Images: Images});
-            var UserNames=this.state.UserNames;
             UserNames.push(doc.data().Username);
             this.setState({UserNames: UserNames});
         })
     }
     }
     AddUser=(User)=>{
-        firestore().collection('Users').doc(User).get().then(doc=>{
+        var UserDoc=firestore().collection('Users').doc(User);
+        var EventDoc=firestore().collection('Events').doc(this.props.eventid);
+        var EventRequests=[];
+        firestore().runTransaction(async transaction=>{
+            var doc=await transaction.get(UserDoc);
             var MembersOf=[];
             if(doc.data().MembersOf!=null)
             {
@@ -75,19 +79,17 @@ class EventRequests extends Component{
                     break;
                 }
             }
-            firestore().collection('Users').doc(User).update({
+            transaction.update(UserDoc,{
                 MembersOf: MembersOf,
                 UserRequests: UserRequests
             })
-        })
-        firestore().collection('Events').doc(this.props.eventid).get().then(Event=>{
+            var Event=await transaction.get(EventDoc);
             var Members=[];
             if(Event.data().Members!=null)
             {
                 Members=Event.data().Members;
             }
             Members.push(User);
-            var EventRequests=[];
             if(Event.data().EventRequests!=null)
             {
                 EventRequests=Event.data().EventRequests;
@@ -102,16 +104,24 @@ class EventRequests extends Component{
                     break;
                 }
             }
-            firestore().collection('Events').doc(this.props.eventid).update({
+            transaction.update(EventDoc,{
                 Members: Members,
                 EventRequests: EventRequests
             })
-            this.setState({Requests: EventRequests});
+        }).then(()=>{
+            this.GetEventRequests();
+        }).catch(err=>{
+            console.log(err);
+            Alert.alert("","Please check your network connection");
         })
 
     }
     RemoveUser=(User)=>{
-        firestore().collection('Users').doc(User).get().then(doc=>{
+        var UserDoc=firestore().collection('Users').doc(User);
+        var EventDoc=firestore().collection('Events').doc(this.props.eventid);
+        var EventRequests=[];
+        firestore().runTransaction(async transaction=>{
+            var doc=await transaction.get(UserDoc);
             var UserRequests=[];
             if(doc.data().UserRequests!=null)
             {
@@ -127,12 +137,10 @@ class EventRequests extends Component{
                     break;
                 }
             }
-            firestore().collection('Users').doc(User).update({
+            transaction.update(UserDoc,{
                 UserRequests: UserRequests
             })
-        })
-        firestore().collection('Events').doc(this.props.eventid).get().then(Event=>{
-            var EventRequests=[];
+            var Event=await transaction.get(EventDoc);
             if(Event.data().EventRequests!=null)
             {
                 EventRequests=Event.data().EventRequests;
@@ -147,10 +155,14 @@ class EventRequests extends Component{
                     break;
                 }
             }
-            firestore().collection('Events').doc(this.props.eventid).update({
+            transaction.update(EventDoc,{
                 EventRequests: EventRequests
             })
-            this.setState({Requests: EventRequests});
+        }).then(()=>{
+            this.GetEventRequests();
+        }).catch(err=>{
+            console.log(err);
+            Alert.alert("","Please check your network connection");
         })
     }
 

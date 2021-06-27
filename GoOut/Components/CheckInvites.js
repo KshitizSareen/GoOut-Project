@@ -24,7 +24,6 @@ class CheckInvites extends Component{
         }
     }
     componentDidMount(){
-        console.log(this.props.route.params.UserID);
         this.FetchInvites();
         messaging().onMessage(async msg=>{
             console.log("message received");
@@ -33,14 +32,14 @@ class CheckInvites extends Component{
     }
 
     GetExternalData=()=>{
+        var Images=[];
+        var EventNames=[];
         for(var i=0;i<this.state.Invites.length;i++)
         {
             var EventID=this.state.Invites[i];
         firestore().collection('Events').doc(EventID).get().then(doc=>{
-            var Images=this.state.Images;
             Images.push(doc.data().ImageUri);
             this.setState({Images: Images});
-            var EventNames=this.state.EventNames;
             EventNames.push(doc.data().Name);
             this.setState({EventNames: EventNames});
         })
@@ -49,7 +48,6 @@ class CheckInvites extends Component{
 
     FetchInvites=()=>{
         firestore().collection('Users').doc(this.props.route.params.UserID).get().then(doc=>{
-            console.log(doc.data());
             if(doc.data().InvitedBy!=null)
             {
                 this.setState({Invites: doc.data().InvitedBy});
@@ -60,7 +58,7 @@ class CheckInvites extends Component{
     AddUser=(Invite,index)=>{
         var EventDoc=firestore().collection('Events').doc(Invite);
         var UserDoc=firestore().collection('Users').doc(this.props.route.params.UserID);
-        var InvitedBy=[];
+        var InvitedBy=this.state.Invites;
         firestore().runTransaction(async transaction=>{
             const Event=await transaction.get(EventDoc);
             var Members=[];
@@ -68,7 +66,7 @@ class CheckInvites extends Component{
             {
                 Members=Event.data().Members;
             }
-            Members.push( this.props.route.params.UserID );
+            Members.push(this.props.route.params.UserID );
             var Invites=[];
             if(Event.data().Invites!=null)
             {
@@ -80,10 +78,10 @@ class CheckInvites extends Component{
                 if(Invites[i]==this.props.route.params.UserID)
                 {
                     UserIndex=i;
+                    Invites.splice(UserIndex,1);
                     break;
                 }
             }
-            Invites.splice(UserIndex,1);
             transaction.update(EventDoc,{
                 Members: Members,
                 Invites: Invites
@@ -95,14 +93,26 @@ class CheckInvites extends Component{
                     MembersOf=User.data().MembersOf;
                 }
                 MembersOf.push(Invite)
-                InvitedBy=this.state.Invites;
-                InvitedBy.splice(index,1);
+                if(User.data().InvitedBy!=null)
+                {
+                    InvitedBy=User.data().InvitedBy;
+                }
+                var EventIndex=null;
+                for(var i=0;i<InvitedBy.length;i++)
+                {
+                    if(InvitedBy[i]==Invite)
+                    {
+                        EventIndex=i;
+                        InvitedBy.splice(EventIndex,1);
+                        break;
+                    }
+                }
                 transaction.update(UserDoc,{
                     MembersOf: MembersOf,
                     InvitedBy: InvitedBy
                 })
         }).then(()=>{
-            this.setState({Invites: InvitedBy});
+            this.FetchInvites();
         }).catch((err)=>{
             console.log(err);
             Alert.alert("","Please check your network connection");
@@ -110,8 +120,11 @@ class CheckInvites extends Component{
     }
     RemoveUser=(index)=>{
         var InvitedBy=this.state.Invites;
-                firestore().collection('Events').doc(InvitedBy[index]).get().then(doc=>{
-                    var Invites=[];
+        var EventDoc=firestore().collection('Events').doc(InvitedBy[index]);
+        var UserDoc=firestore().collection('Users').doc(this.props.route.params.UserID);
+        firestore().runTransaction(async transaction=>{
+            var doc=await transaction.get(EventDoc);
+            var Invites=[];
                     if(doc.data().Invites!=null)
                     {
                         Invites=doc.data().Invites;
@@ -122,19 +135,37 @@ class CheckInvites extends Component{
                         if(Invites[i]==this.props.route.params.UserID)
                         {
                             Userindex=i;
+                            Invites.splice(Userindex,1);
+                            break;
+                        }
+                    } 
+                    transaction.update(EventDoc,{
+                        Invites: Invites
+                    })
+                    var User=await transaction.get(UserDoc);
+                    if(User.data().InvitedBy!=null)
+                    {
+                        InvitedBy=User.data().InvitedBy;
+                    }
+                    var EventIndex=null;
+                    for(var i=0;i<InvitedBy.length;i++)
+                    {
+                        if(InvitedBy[i]==InvitedBy[index])
+                        {
+                            EventIndex=i;
+                            InvitedBy.splice(EventIndex,1);
                             break;
                         }
                     }
-                    Invites.splice(Userindex,1);
-                    firestore().collection('Events').doc(doc.id).update({
-                        Invites: Invites
+                    transaction.update(UserDoc,{
+                        InvitedBy: InvitedBy
                     })
-                })
-                InvitedBy.splice(index,1);
-                firestore().collection('Users').doc(this.props.route.params.UserID).update({
-                    InvitedBy: InvitedBy
-                })
-                this.setState({Invites: InvitedBy});
+        }).then(()=>{
+            this.setState({Invites: InvitedBy});
+        }).catch((err)=>{
+            console.log(err);
+            Alert.alert("","Please check your network connection");
+        })
     }
 
     render(){

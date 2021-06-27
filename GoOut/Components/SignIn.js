@@ -67,20 +67,11 @@ class SignIn extends Component{
       querySnapshot.forEach(function(doc) {
           // doc.data() is never undefined for query doc snapshots
           docid=doc.id;
-          messaging().getToken().then(token=>{
-            firestore().collection('Users').doc(doc.id).update({
-                NotificationToken:token
-            }).catch(err=>{
-                console.log(err);
-            })
-         })
         });
         this.props.navigation.navigate("Tabs",{userid: docid});
             AsyncStorage.setItem('Email',this.state.username);
             AsyncStorage.setItem('Password',this.state.password);})}).catch(error=>{
                     // Handle Errors here.
-                    var errorCode = error.code;
-                    var errorMessage = error.message;
                     Alert.alert("","Inavlid Credentials");
                     return;
                 });
@@ -106,9 +97,7 @@ class SignIn extends Component{
         return UserSubstrings;
     }
     SignUp=()=>{
-        NetInfo.fetch().then((state)=>{
-            if(state.isConnected)
-            {
+
                 if(this.state.usernameCreate!="" && this.state.passwordCreate!="" && this.state.displayName!="" && this.state.FirstName!="" && this.state.LastName!="")
                 {
                     
@@ -123,13 +112,14 @@ class SignIn extends Component{
                             LastName: this.state.LastName.charAt(0).toUpperCase()+this.state.LastName.slice(1),
                             SearchArray: this.GenerateSubstrings([this.state.displayName.toLowerCase(),this.state.FirstName.toLowerCase(),this.state.LastName.toLowerCase()]),
                             userid: res.user.uid
+                         }).catch(err=>{
+                            console.log(err);
+                            Alert.alert("","Please check your network connection");
                          });
                         this.setState({modalSignupVisible: false});
                     })
                     .catch(error=>{
                   // Handle Errors here.
-                  var errorCode = error.code;
-                  var errorMessage = error.message;
                   Alert.alert("","Inavlid Credentials");
                   console.log(error);
                   return;
@@ -139,12 +129,6 @@ class SignIn extends Component{
             {
                 Alert.alert("","Please enter all the details");
             }
-            }
-            else
-            {
-                Alert.alert("","Please connect to the internet");
-            }
-        });
     }
     SetModalLoginVisible=async ()=>{
         if (this.state.modalLoginVisible)
