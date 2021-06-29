@@ -192,6 +192,7 @@ const styles=StyleSheet.create({
           backgroundColor: '#dce8e7',
           width: 0.7*windowWidth,
           alignContent: 'center',
+          color: 'black'
         },
     code:{
         borderRadius: 10,

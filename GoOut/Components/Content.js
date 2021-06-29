@@ -17,6 +17,7 @@ import EventUsers from './EventUsers.js';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faBook, faBookReader, faBug, faClipboardList, faComment, faImage, faInfo, faList, faSignInAlt, faSignOutAlt, faTag, faTextHeight, faUser, faUserCircle, faUserFriends, faWindowClose } from '@fortawesome/free-solid-svg-icons';
 import EventRequests from './EventRequests.js';
+import axios from 'axios';
 class Content extends Component{
     constructor() {
         super();
@@ -45,44 +46,42 @@ class Content extends Component{
       }
     componentDidMount(){
         userid=this.props.route.params.userid;
-        NetInfo.fetch().then((state)=>{
-            if(state.isConnected)
-            {
-                firestore().collection('Events').doc(this.props.route.params.eventid).get().then((doc)=>{
-                    if(doc.exists)
-                    {
-                        this.setState({Name:doc.data().Name});
-                        this.setState({Time:doc.data().Time});
-                        this.setState({Price:doc.data().Price});
-                        this.setState({Date: doc.data().Date});
-                        this.setState({ImageUri: doc.data().ImageUri});
-                        this.setState({OwnerID: doc.data().Owner});
-                        if(doc.data().Members!=null)
-                        {
-                            this.setState({NoOfMembers: doc.data().Members.length});
-                            this.setState({Members: doc.data().Members});
-                        }
-                        if(doc.data().Invites!=null)
-                        {
-                            this.setState({NoOfInvites: doc.data().Invites.length});
-                        }
-                        if(doc.data().EventRequests!=null)
-                        {
-                            this.setState({EventRequests: doc.data().EventRequests});
-                        }
-                        if(doc.data().Invites!=null)
-                        {
-                            this.setState({Invites: doc.data().Invites});
-                        }
-                    }
-                });
                 this.SetChat();
-            }
-            else{
-                Alert.alert("","Please connect to the internet")
-            }
+                this.InitializeContent();
+        messaging().onMessage(async mess=>{
+            this.InitializeContent();
         })
 
+    }
+    InitializeContent=()=>{
+        firestore().collection('Events').doc(this.props.route.params.eventid).get().then((doc)=>{
+            if(doc.exists)
+            {
+                this.setState({Name:doc.data().Name});
+                this.setState({Time:doc.data().Time});
+                this.setState({Price:doc.data().Price});
+                this.setState({Date: doc.data().Date});
+                this.setState({ImageUri: doc.data().ImageUri});
+                this.setState({OwnerID: doc.data().Owner});
+                if(doc.data().Members!=null)
+                {
+                    this.setState({NoOfMembers: doc.data().Members.length});
+                    this.setState({Members: doc.data().Members});
+                }
+                if(doc.data().Invites!=null)
+                {
+                    this.setState({NoOfInvites: doc.data().Invites.length});
+                }
+                if(doc.data().EventRequests!=null)
+                {
+                    this.setState({EventRequests: doc.data().EventRequests});
+                }
+                if(doc.data().Invites!=null)
+                {
+                    this.setState({Invites: doc.data().Invites});
+                }
+            }
+        });
     }
       SetChat=()=>{
 
@@ -152,7 +151,27 @@ class Content extends Component{
                 EventRequests: EventRequests
             })
         }).then(()=>{
+            firestore().collection('Users').doc(this.state.OwnerID).get().then((User)=>{
+                console.log(User.data());
+                if(User.data().Notification!=null)
+                {
+                    axios.post("https://fcm.googleapis.com/fcm/send",{
+  "to" : User.data().NotificationToken,
+"data":{
 
+},
+"notification":{
+"title": "GoOut",
+"body":"You have requested to join "+this.state.Name
+}
+},{
+  headers:{
+    Authorization: "key=AAAA7tNMKV0:APA91bEZHjBk7k1YayjyS_7HrM8rznxOyH-_1GHWH58hqyvmVMoBPMCCsQ23G-9W16gJhh2RyDVE4qSWn5y2QiX3MG39hv1javY_34IJNE5PpWdMKa-QHSXaXop8nxpZc5-VsP2OTzXd",
+    "Content-Type": "application/json"
+  },
+})
+                }
+            })
         }).catch(err=>{
             console.log(err);
             Alert.alert("","Please check your network connection");

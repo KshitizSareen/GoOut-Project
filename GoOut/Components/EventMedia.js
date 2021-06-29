@@ -82,7 +82,6 @@ class EventMedia extends Component{
                     if(ImagesToSend.length==images.length)
                                 {
                              this.props.navigation.navigate("Image Editing",{Images:ImagesToSend,SendMessage: this.SendMediaMessage,UserId:this.props.userid,eventid: this.props.eventid,User: this.state.User,FromMedia: true,LoadImage:this.LoadImage});
-                             this.props.ShowAnimation(false);
                                 }
                     }).catch(err => {
                         console.log(err);
@@ -114,7 +113,6 @@ class EventMedia extends Component{
                                             if(ImagesToSend.length==images.length)
                                 {
                              this.props.navigation.navigate("Image Editing",{Images:ImagesToSend,SendMessage: this.SendMediaMessage,UserId:this.props.userid,eventid: this.props.eventid,User: this.state.User,FromMedia: true,LoadImage:this.LoadImage});
-                             this.props.ShowAnimation(false);
                                 }
                                         });
                                 });
@@ -124,9 +122,7 @@ class EventMedia extends Component{
                     }
                 })
               }).catch(err=>{
-                this.props.ShowAnimation(false);
               })
-              this.props.ShowAnimation(true);
               
     }
       render(){

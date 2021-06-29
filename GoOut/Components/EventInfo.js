@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
+import axios from 'axios';
 class EventInfo extends Component{
     constructor(){
       super();
@@ -51,7 +52,11 @@ class EventInfo extends Component{
                 Time: res.data().Time,
                 Free: res.data().Free
              })
-        })
+        }).then(()=>{
+        }).catch((err)=>{
+          console.log(err);
+          Alert.alert("","Please check your network connection");
+      })
     }
     SetName=(value)=>{
       this.setState({Name:value});
@@ -130,6 +135,35 @@ class EventInfo extends Component{
             })
           }).then(()=>{
             Alert.alert("","Event Succesfully Updated");
+            firestore().collection('Events').doc(this.props.eventid).get().then(Event=>{
+              if(Event.data().Members!=null)
+              {
+                  for(var i=0;i<Event.data().Members.length;i++)
+                  {
+                      firestore().collection('Users').doc(Event.data().Members[i]).get().then(User=>{
+                          if(User.data().NotificationToken!=null)
+                          {
+                              axios.post("https://fcm.googleapis.com/fcm/send",{
+  "to" : User.data().NotificationToken,
+  "data":{
+  
+  },
+  "notification":{
+  "title": "GoOut",
+  "body": "Info has been updated in "+Event.data().Name+", Check your app for details"
+  }
+  },{
+  headers:{
+  Authorization: "key=AAAA7tNMKV0:APA91bEZHjBk7k1YayjyS_7HrM8rznxOyH-_1GHWH58hqyvmVMoBPMCCsQ23G-9W16gJhh2RyDVE4qSWn5y2QiX3MG39hv1javY_34IJNE5PpWdMKa-QHSXaXop8nxpZc5-VsP2OTzXd",
+  "Content-Type": "application/json"
+  },
+  })
+                          }
+                      })
+  
+                  }
+              }
+          })
           }).catch(err=>{
             console.log(err);
             Alert.alert("","Please check your network connection");
@@ -187,7 +221,7 @@ class EventInfo extends Component{
             }}>
               <View style={styleevent.centeredViewModal}>
                 <View style={styleevent.modalView}>
-                <TextInput placeholder="Enter Tag" value={this.state.Tag} placeholderTextColor="grey" style={{
+                <TextInput placeholder="Enter Tag" placeholderTextColor="darkgrey" value={this.state.Tag} style={{
                     width: 0.9*windowWidth,
                     padding: '4%',
                     color: 'grey',
@@ -208,8 +242,8 @@ class EventInfo extends Component{
                       alignItems: 'center',
                       borderBottomWidth: 1}}>
                       <Text style={{width: 0.75*windowWidth,
-                    color: 'grey',
-                    fontSize: 22,
+                    color: 'black',
+                    fontSize: 15,
                     padding: '4%'}}>{Tag}</Text>
                       <TouchableOpacity style={{
                         padding: '5%'
@@ -236,15 +270,15 @@ class EventInfo extends Component{
                 {
                   ShowTagModel()
                 }
-                  <TextInput editable={this.props.userid==this.props.OwnerId} scrollEnabled={true} placeholder="Name" placeholderTextColor="grey" style={styleevent.EventName} value={this.state.Name} onChangeText={(value)=>{
+                  <TextInput editable={this.props.userid==this.props.OwnerId} placeholderTextColor="darkgrey" scrollEnabled={true} placeholder="Name"  style={styleevent.EventName} value={this.state.Name} onChangeText={(value)=>{
                     this.SetName(value);
                   }}/>
                   <TouchableOpacity disabled={this.props.userid!=this.props.OwnerId} style={styleevent.EventTags} onPress={()=>{
                     this.ShowTagModal(true);
                   }}>
-                    <TextInput multiline={true} editable={false} style={{fontSize: 20,color: 'grey'}} value={this.state.Tags.length==0 ? "Tags" : this.state.Tags.join(' ')}/>
+                    <TextInput placeholderTextColor="darkgrey" multiline={true} editable={false} style={{fontSize: 20,color: 'grey'}} value={this.state.Tags.length==0 ? "Tags" : this.state.Tags.join(' ')}/>
                   </TouchableOpacity>
-                  <TextInput editable={this.props.userid==this.props.OwnerId} placeholder="Location" placeholderTextColor="grey" style={styleevent.EventAddress} value={this.state.Location} multiline={true} onChangeText={(value)=>{
+                  <TextInput placeholderTextColor="darkgrey" editable={this.props.userid==this.props.OwnerId} placeholder="Location"  style={styleevent.EventAddress} value={this.state.Location} multiline={true} onChangeText={(value)=>{
                     this.SetLocation(value);
                   }}/>
                   <TouchableOpacity style={{
@@ -279,11 +313,11 @@ class EventInfo extends Component{
                   }}><Text style={styleevent.Time}>{this.state.Time}</Text></TouchableOpacity>
                   <Text style={styleevent.label}>Age Group:</Text>
                   <View style={styleevent.AgeView}>
-                      <TextInput editable={this.props.userid==this.props.OwnerId} style={styleevent.AgeInput} keyboardType="number-pad" placeholder="From" placeholderTextColor="grey" value={this.state.From} onChangeText={(value)=>{
+                      <TextInput placeholderTextColor="darkgrey" editable={this.props.userid==this.props.OwnerId} placeholderTextColor="darkgrey" style={styleevent.AgeInput} keyboardType="number-pad" placeholder="From" value={this.state.From} onChangeText={(value)=>{
                     this.SetFrom(value);
                   }}/>
                   <View style={styleevent.Seperator}><Text>---</Text></View>
-                  <TextInput editable={this.props.userid==this.props.OwnerId} style={styleevent.AgeInput} placeholderTextColor="grey" keyboardType="number-pad" placeholder="To" value={this.state.To} onChangeText={(value)=>{
+                  <TextInput placeholderTextColor="darkgrey" editable={this.props.userid==this.props.OwnerId} placeholderTextColor="darkgrey" style={styleevent.AgeInput} keyboardType="number-pad" placeholder="To" value={this.state.To} onChangeText={(value)=>{
                     this.SetTo(value);
                   }}/>
                   </View>
@@ -306,7 +340,7 @@ class EventInfo extends Component{
                   </View>
                   </View> : null
                   }
-                   <TextInput editable={this.props.userid==this.props.OwnerId} placeholder="Set Price" placeholderTextColor="grey" style={styleevent.EventPrice} value={this.state.Price.toString()} keyboardType="number-pad" onChangeText={(value)=>{
+                   <TextInput placeholderTextColor="darkgrey" editable={this.props.userid==this.props.OwnerId} placeholder="Set Price" style={styleevent.EventPrice} value={this.state.Price.toString()} keyboardType="number-pad" onChangeText={(value)=>{
              this.SetPrice(value);
             }}/>
                 {
@@ -331,6 +365,7 @@ class EventInfo extends Component{
         flexDirection: 'column',
         justifyContent: 'space-evenly',
         alignItems: 'center',
+        height: windowHeight
       },
       EventName:{
         width: 0.9*windowWidth,
@@ -341,7 +376,7 @@ class EventInfo extends Component{
         fontSize: 20,
         padding: '1%',
         marginTop: '3%',
-        color: 'grey'
+        color: 'black'
       },
       EventTags:{
         width: 0.9*windowWidth,
@@ -362,16 +397,16 @@ class EventInfo extends Component{
         fontSize: 20,
         padding: '1%',
         fontSize: 20,
-        color: 'grey'
+        color: 'black'
       },
       Time:{
         fontSize: 20,
-        color: 'grey'
+        color: 'black'
       },
       label:{
         height: 40,
         fontWeight: '100',
-        color: 'grey',
+        color: 'black',
         fontSize: 20,
         marginBottom: '1%',
       },
@@ -390,7 +425,7 @@ class EventInfo extends Component{
         fontSize: 20,
         padding: '1%',
         fontSize: 20,
-        color: 'grey'
+        color: 'black'
       },
       Seperator:{
         width: 0.1*windowWidth,
@@ -426,9 +461,9 @@ class EventInfo extends Component{
         marginBottom: '5%',
         fontSize: 20,
         padding: '1%',
-        width: 0.9*windowWidth,
+        width: 375,
         fontSize: 20,
-        color: 'grey'
+        color: 'black'
 
   },
   modalView: {

@@ -190,10 +190,10 @@ class SignIn extends Component{
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <TextInput placeholder="Email" style={styles.textinput} value={this.state.username} onChangeText={(value)=>{
+            <TextInput placeholder="Email" style={styles.textinput} value={this.state.username} placeholderTextColor="darkgrey" onChangeText={(value)=>{
                 this.setState({username: value});
             }}/>
-            <TextInput placeholder="Password" secureTextEntry={true} style={styles.textinput} value={this.state.password} onChangeText={(value)=>{
+            <TextInput placeholder="Password" secureTextEntry={true} style={styles.textinput} placeholderTextColor="darkgrey" value={this.state.password} onChangeText={(value)=>{
                 this.setState({password: value})  
         }}/>
            <TouchableOpacity style={styles.ButtonModal}  onPress={()=>{this.SignIn()}}><Text style={styles.Text3}>Login</Text></TouchableOpacity>
@@ -213,19 +213,19 @@ class SignIn extends Component{
       >
         <View style={styles.centeredView} >
           <View style={styles.modalView}>
-          <TextInput placeholder="First Name" style={styles.textinput} onChangeText={(value)=>{
+          <TextInput placeholder="First Name" style={styles.textinput} placeholderTextColor="darkgrey" onChangeText={(value)=>{
                 this.setState({FirstName: value});
             }}/>
-            <TextInput placeholder="Last Name" style={styles.textinput} onChangeText={(value)=>{
+            <TextInput placeholder="Last Name" style={styles.textinput} placeholderTextColor="darkgrey" onChangeText={(value)=>{
                 this.setState({LastName: value});
             }}/>
-          <TextInput placeholder="Username" style={styles.textinput} onChangeText={(value)=>{
+          <TextInput placeholder="Username" style={styles.textinput} placeholderTextColor="darkgrey" onChangeText={(value)=>{
                 this.setState({displayName: value});
             }}/>
-            <TextInput placeholder="Email" style={styles.textinput} onChangeText={(value)=>{
+            <TextInput placeholder="Email" style={styles.textinput} placeholderTextColor="darkgrey" onChangeText={(value)=>{
                 this.setState({usernameCreate: value});
             }}/>
-            <TextInput placeholder="Password" style={styles.textinput} secureTextEntry={true} onChangeText={(value)=>{
+            <TextInput placeholder="Password" style={styles.textinput} placeholderTextColor="darkgrey" secureTextEntry={true} onChangeText={(value)=>{
                 this.setState({passwordCreate: value});
             }}/>
             <TouchableOpacity style={styles.ButtonModal}  onPress={()=>{this.SignUp()}}><Text style={styles.Text3}>Sign up</Text></TouchableOpacity>
@@ -301,7 +301,8 @@ const styles= StyleSheet.create({
           borderRadius: 10,
           backgroundColor: '#f0f2f5',
           width: 0.5*windowWidth,
-          alignContent: 'center'
+          alignContent: 'center',
+          color: 'black'
       },
       ButtonModal:{
         backgroundColor: 'lightblue',

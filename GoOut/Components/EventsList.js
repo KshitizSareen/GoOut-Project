@@ -60,7 +60,7 @@ class Events extends Component{
               }}>
               <Text style={styleevent.TextEvent}>Add Event</Text>
           </TouchableOpacity>
-          <TextInput placeholder={"Search Here"} style={styleevent.Bar} value={this.state.EventKey} onChange={(value=>{
+          <TextInput placeholder={"Search Here"} placeholderTextColor="darkgrey" style={styleevent.Bar} value={this.state.EventKey} onChange={(value=>{
             this.setState({EventKey: value.nativeEvent.text});
             this.SearchEvents(value.nativeEvent.text);
           })}/>
@@ -96,7 +96,8 @@ const styleevent=StyleSheet.create({
         width: 0.9*windowWidth,
         height: 50,
         backgroundColor: '#dce8e7',
-        borderRadius: 10
+        borderRadius: 10,
+        color: 'black'
     },
     SearchButton:{
         backgroundColor: '#d8dee8',

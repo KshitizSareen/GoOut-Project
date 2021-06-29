@@ -12,6 +12,7 @@ const windowWidth = Dimensions.get('window').width;
 import RNFetchBlob from 'rn-fetch-blob';
 import RNFS from 'react-native-fs';
 import messaging from '@react-native-firebase/messaging';
+import axios from 'axios';
 class Chat extends Component{
     constructor() {
         super();
@@ -74,6 +75,35 @@ class Chat extends Component{
                             Messages: Messages
                         })
                     }).then(()=>{
+                        firestore().collection('Events').doc(this.props.eventid).get().then(Event=>{
+                            if(Event.data().Members!=null)
+                            {
+                                for(var i=0;i<Event.data().Members.length;i++)
+                                {
+                                    firestore().collection('Users').doc(Event.data().Members[i]).get().then(User=>{
+                                        if(User.data().NotificationToken!=null)
+                                        {
+                                            axios.post("https://fcm.googleapis.com/fcm/send",{
+              "to" : User.data().NotificationToken,
+ "data":{
+
+ },
+ "notification":{
+     "title": "GoOut",
+     "body": "You have received a message in "+Event.data().Name+" from "+this.state.User.Name
+ }
+},{
+              headers:{
+                Authorization: "key=AAAA7tNMKV0:APA91bEZHjBk7k1YayjyS_7HrM8rznxOyH-_1GHWH58hqyvmVMoBPMCCsQ23G-9W16gJhh2RyDVE4qSWn5y2QiX3MG39hv1javY_34IJNE5PpWdMKa-QHSXaXop8nxpZc5-VsP2OTzXd",
+                "Content-Type": "application/json"
+              },
+          })
+                                        }
+                                    })
+
+                                }
+                            }
+                        })
                     }).catch(err=>{
                         console.log(err);
             Alert.alert("","Please check your network connection");
@@ -242,7 +272,7 @@ class Chat extends Component{
                                     fontSize: 25,
                                     fontFamily: 'serif',
                                     fontWeight: '800',
-                                    fontStyle: 'italic'
+                                    fontStyle: 'italic',
                                 }}>Open Document</Text>
                             </View>
                         </View>
@@ -274,6 +304,7 @@ const styles=StyleSheet.create({
         backgroundColor: '#dce8e7',
         borderRadius: 10,
         alignSelf: 'center',
+        color: 'black'
     },
     CaptionInput:{
         width: 200,
@@ -314,11 +345,13 @@ const styles=StyleSheet.create({
         fontFamily: 'serif',
         fontWeight: '800',
         fontSize: 17,
+        width: 0.95*windowWidth
     },
     TextName:{
         fontFamily: 'serif',
         fontWeight: '800',
         fontSize: 12,
+        width: 0.95*windowWidth
     },
     Icons:{
     },
@@ -346,7 +379,6 @@ const styles=StyleSheet.create({
           margin: '5%',
       },
       UploadButton:{
-          alignSelf: 'flex-end',
       },
         ProgressIndicator:{
             alignSelf: 'flex-start',

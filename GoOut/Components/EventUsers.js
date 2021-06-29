@@ -79,10 +79,11 @@ class EventUsers extends Component{
                           })
         }).then(()=>{
             this.SearchUsers(this.state.Username);
-                    /*axios.post("https://fcm.googleapis.com/fcm/send",{
+            firestore().collection('Events').doc(this.props.eventid).get().then(Event=>{
+                axios.post("https://fcm.googleapis.com/fcm/send",{
                         "to" : User.data().NotificationToken,
            "notification" : {
-               "body" : "You have been invited to "+this.props.EventName+"\n"+"Check your app for invites",
+               "body" : "You have been invited to "+Event.data().Name+"\n"+"Check your app for invites",
                "title": "Event Invite"
            },
            "data":{
@@ -93,7 +94,31 @@ class EventUsers extends Component{
                           Authorization: "key=AAAA7tNMKV0:APA91bEZHjBk7k1YayjyS_7HrM8rznxOyH-_1GHWH58hqyvmVMoBPMCCsQ23G-9W16gJhh2RyDVE4qSWn5y2QiX3MG39hv1javY_34IJNE5PpWdMKa-QHSXaXop8nxpZc5-VsP2OTzXd",
                           "Content-Type": "application/json"
                         },
-                    })*/
+                    })
+                        if(Event.data().Members!=null)
+                        {
+                            for(var i=0;i<Event.data().Members.length;i++)
+                            {
+                                firestore().collection('Users').doc(Event.data().Members[i]).get().then(User=>{
+                                    if(User.data().NotificationToken!=null)
+                                    {
+                                        axios.post("https://fcm.googleapis.com/fcm/send",{
+          "to" : User.data().NotificationToken,
+        "data":{
+        
+        },
+        },{
+          headers:{
+            Authorization: "key=AAAA7tNMKV0:APA91bEZHjBk7k1YayjyS_7HrM8rznxOyH-_1GHWH58hqyvmVMoBPMCCsQ23G-9W16gJhh2RyDVE4qSWn5y2QiX3MG39hv1javY_34IJNE5PpWdMKa-QHSXaXop8nxpZc5-VsP2OTzXd",
+            "Content-Type": "application/json"
+          },
+        })
+                                    }
+                                })
+        
+                            }
+                        }
+            })
         }).catch(err=>{
             console.log(err);
             Alert.alert("","Please check your network connection");
@@ -144,21 +169,46 @@ class EventUsers extends Component{
                 })
             }).then(()=>{
                 this.SearchUsers(this.state.Username);
-                    /*axios.post("https://fcm.googleapis.com/fcm/send",{
-              "to" : User.data().NotificationToken,
- "data":{
-
- }
-},{
-              headers:{
-                Authorization: "key=AAAA7tNMKV0:APA91bEZHjBk7k1YayjyS_7HrM8rznxOyH-_1GHWH58hqyvmVMoBPMCCsQ23G-9W16gJhh2RyDVE4qSWn5y2QiX3MG39hv1javY_34IJNE5PpWdMKa-QHSXaXop8nxpZc5-VsP2OTzXd",
-                "Content-Type": "application/json"
-              },
-          })
+                firestore().collection('Events').doc(this.props.eventid).get().then(Event=>{
+                    axios.post("https://fcm.googleapis.com/fcm/send",{
+                            "to" : User.data().NotificationToken,
+               "data":{
+              
+               }
+              },{
+                            headers:{
+                              Authorization: "key=AAAA7tNMKV0:APA91bEZHjBk7k1YayjyS_7HrM8rznxOyH-_1GHWH58hqyvmVMoBPMCCsQ23G-9W16gJhh2RyDVE4qSWn5y2QiX3MG39hv1javY_34IJNE5PpWdMKa-QHSXaXop8nxpZc5-VsP2OTzXd",
+                              "Content-Type": "application/json"
+                            },
+                        })
+                        if(Event.data().Members!=null)
+                        {
+                            for(var i=0;i<Event.data().Members.length;i++)
+                            {
+                                firestore().collection('Users').doc(Event.data().Members[i]).get().then(User=>{
+                                    if(User.data().NotificationToken!=null)
+                                    {
+                                        axios.post("https://fcm.googleapis.com/fcm/send",{
+          "to" : User.data().NotificationToken,
+        "data":{
+        
+        },
+        },{
+          headers:{
+            Authorization: "key=AAAA7tNMKV0:APA91bEZHjBk7k1YayjyS_7HrM8rznxOyH-_1GHWH58hqyvmVMoBPMCCsQ23G-9W16gJhh2RyDVE4qSWn5y2QiX3MG39hv1javY_34IJNE5PpWdMKa-QHSXaXop8nxpZc5-VsP2OTzXd",
+            "Content-Type": "application/json"
+          },
+        })
+                                    }
+                                })
+        
+                            }
+                        }
+                })
+                
             }).catch(err=>{
                 console.log(err);
             Alert.alert("","Please check your network connection");
-            */
             })
     }
     render(){
@@ -188,7 +238,7 @@ class EventUsers extends Component{
         }
         return(
             <View style={styles.background}>
-                <TextInput style={styles.searchbar} placeholder="Search Users" value={this.state.Username} placeholderTextColor="black" onChange={(value)=>{
+                <TextInput style={styles.searchbar} placeholder="Search Users" placeholderTextColor="darkgrey" value={this.state.Username} onChange={(value)=>{
                     this.setState({Username:value.nativeEvent.text});
                     this.SearchUsers(value.nativeEvent.text);
                 }}/>
@@ -220,8 +270,7 @@ class EventUsers extends Component{
                                     priority: FastImage.priority.high
                                 }}/>
                             <View>
-                            <Text style={{color: 'black',fontSize: 22}}>{data.item.data().Username}</Text>
-                            <Text style={{color: 'black',fontSize: 22}}>{data.item.data().FirstName+" "+data.item.data().LastName}</Text>
+                            <Text style={{color: 'black',fontSize: 22,width: 0.7*windowWidth}}>{data.item.data().Username}</Text>
                             </View>
                             </View>
                             {
@@ -244,9 +293,10 @@ const styles=StyleSheet.create({
     },
     searchbar:{
         width: 0.75*windowWidth,
-        backgroundColor: '#c1c7c5',
+        backgroundColor: '#dce8e7',
         borderRadius: 10,
-        margin: '5%'
+        margin: '5%',
+        color: 'black'
     }
 })
 export default EventUsers;

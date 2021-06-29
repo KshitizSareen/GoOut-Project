@@ -180,10 +180,10 @@ class EventCreate extends Component{
             }}>
               <View style={styleevent.centeredViewModal}>
                 <View style={styleevent.modalView}>
-                  <TextInput placeholder="Enter Tag" value={this.state.Tag} placeholderTextColor="grey" style={{
+                  <TextInput placeholder="Enter Tag" placeholderTextColor="darkgrey" value={this.state.Tag} style={{
                     width: 0.9*windowWidth,
                     padding: '4%',
-                    color: 'grey',
+                    color: 'black',
                     borderBottomWidth: 1
                   }} onChange={(value)=>{
                     this.setState({Tag: value.nativeEvent.text});
@@ -203,8 +203,9 @@ class EventCreate extends Component{
                       borderBottomWidth: 1}}>
                       <Text style={{
                     color: 'grey',
-                    fontSize: 22,
-                    padding: '4%'}}>{Tag}</Text>
+                    fontSize: 15,
+                    padding: '4%',
+                    width: 0.8*windowWidth}}>{Tag}</Text>
                       <TouchableOpacity style={{
                         padding: '5%'
                       }} onPress={()=>{
@@ -230,7 +231,7 @@ class EventCreate extends Component{
                 {
                   ShowTagModel()
                 }
-                  <TextInput scrollEnabled={true} placeholder="Name" placeholderTextColor="grey" style={styleevent.EventName} value={this.state.Name} onChangeText={(value)=>{
+                  <TextInput scrollEnabled={true} placeholder="Name" placeholderTextColor="darkgrey"  style={styleevent.EventName} value={this.state.Name} onChangeText={(value)=>{
                     this.SetName(value);
                   }}/>
                   <TouchableOpacity>
@@ -239,9 +240,9 @@ class EventCreate extends Component{
                   <TouchableOpacity style={styleevent.EventTags} onPress={()=>{
                     this.ShowTagModal(true);
                   }}>
-                    <TextInput multiline={true} editable={false} style={{fontSize: 20,color: 'grey'}} value={this.state.Tags.length==0 ? "Tags" : this.state.Tags.join(' ')}/>
+                    <TextInput multiline={true} editable={false}  placeholderTextColor="darkgrey" style={{fontSize: 20,color: 'black'}} value={this.state.Tags.length==0 ? "Tags" : this.state.Tags.join(' ')}/>
                   </TouchableOpacity>
-                  <TextInput placeholder="Location" placeholderTextColor="grey" style={styleevent.EventAddress} value={this.state.Location} multiline={true} onChangeText={(value)=>{
+                  <TextInput placeholder="Location" placeholderTextColor="darkgrey"  style={styleevent.EventAddress} value={this.state.Location} multiline={true} onChangeText={(value)=>{
                     this.SetLocation(value);
                   }}/>
                   <TouchableOpacity style={{
@@ -276,9 +277,9 @@ class EventCreate extends Component{
                   }}><Text style={styleevent.Time}>{this.state.Time}</Text></TouchableOpacity>
                   <Text style={styleevent.label}>Age Group:</Text>
                   <View style={styleevent.AgeView}>
-                      <TextInput style={styleevent.AgeInput} keyboardType="number-pad" placeholder="From" placeholderTextColor="grey" value={this.state.From} onChangeText={(value)=>{
+                      <TextInput style={styleevent.AgeInput} keyboardType="number-pad" placeholderTextColor="darkgrey" placeholder="From" value={this.state.From} onChangeText={(value)=>{
                     this.SetFrom(value);
-                  }}/><View style={styleevent.Seperator}><Text>---</Text></View><TextInput style={styleevent.AgeInput} placeholderTextColor="grey" keyboardType="number-pad" placeholder="To" value={this.state.To} onChangeText={(value)=>{
+                  }}/><View style={styleevent.Seperator}><Text>---</Text></View><TextInput placeholderTextColor="darkgrey" style={styleevent.AgeInput} keyboardType="number-pad" placeholder="To" value={this.state.To} onChangeText={(value)=>{
                     this.SetTo(value);
                   }}/>
                   </View>
@@ -294,7 +295,7 @@ class EventCreate extends Component{
                       this.SetPermission(value);
                     }}/>
                   </View>
-                  <TextInput placeholder="Set Price" placeholderTextColor="grey" style={styleevent.EventPrice} value={this.state.Price} keyboardType="number-pad" onChangeText={(value)=>{
+                  <TextInput placeholderTextColor="darkgrey" placeholder="Set Price"  style={styleevent.EventPrice} value={this.state.Price} keyboardType="number-pad" onChangeText={(value)=>{
              this.SetPrice(value);
             }}/>
                   <TouchableOpacity style={styleevent.Button} onPress={()=>{
@@ -326,7 +327,7 @@ class EventCreate extends Component{
           fontSize: 20,
           padding: '1%',
           marginTop: '3%',
-          color: 'grey'
+          color: 'black'
         },
         EventTags:{
           width: 0.9*windowWidth,
@@ -347,16 +348,16 @@ class EventCreate extends Component{
           fontSize: 20,
           padding: '1%',
           fontSize: 20,
-          color: 'grey'
+          color: 'black'
         },
         Time:{
           fontSize: 20,
-          color: 'grey'
+          color: 'black'
         },
         label:{
           height: 40,
           fontWeight: '100',
-          color: 'grey',
+          color: 'black',
           fontSize: 20,
           marginBottom: '1%',
         },
@@ -375,7 +376,7 @@ class EventCreate extends Component{
           fontSize: 20,
           padding: '1%',
           fontSize: 20,
-          color: 'grey'
+          color: 'black'
         },
         Seperator:{
           width: 0.1*windowWidth,
@@ -413,7 +414,7 @@ class EventCreate extends Component{
           padding: '1%',
           width: 375,
           fontSize: 20,
-          color: 'grey'
+          color: 'black'
 
     },
     modalView: {

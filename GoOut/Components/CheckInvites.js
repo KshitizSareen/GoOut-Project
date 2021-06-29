@@ -13,6 +13,7 @@ const windowHeight = Dimensions.get('window').height;
 import FastImage from 'react-native-fast-image';
 import auth from '@react-native-firebase/auth';
 import messaging from '@react-native-firebase/messaging';
+import axios from 'axios';
 
 class CheckInvites extends Component{
     constructor(){
@@ -26,7 +27,6 @@ class CheckInvites extends Component{
     componentDidMount(){
         this.FetchInvites();
         messaging().onMessage(async msg=>{
-            console.log("message received");
             this.FetchInvites();
         })
     }
@@ -113,6 +113,35 @@ class CheckInvites extends Component{
                 })
         }).then(()=>{
             this.FetchInvites();
+            firestore().collection('Events').doc(Invite).get().then(Event=>{
+                if(Event.data().Members!=null)
+                {
+                    for(var i=0;i<Event.data().Members.length;i++)
+                    {
+                        firestore().collection('Users').doc(Event.data().Members[i]).get().then(User=>{
+                            if(User.data().NotificationToken!=null)
+                            {
+                                axios.post("https://fcm.googleapis.com/fcm/send",{
+  "to" : User.data().NotificationToken,
+"data":{
+
+},
+"notification":{
+"title": "GoOut",
+"body": User.data().Username +" has joined "+Event.data().Name
+}
+},{
+  headers:{
+    Authorization: "key=AAAA7tNMKV0:APA91bEZHjBk7k1YayjyS_7HrM8rznxOyH-_1GHWH58hqyvmVMoBPMCCsQ23G-9W16gJhh2RyDVE4qSWn5y2QiX3MG39hv1javY_34IJNE5PpWdMKa-QHSXaXop8nxpZc5-VsP2OTzXd",
+    "Content-Type": "application/json"
+  },
+})
+                            }
+                        })
+
+                    }
+                }
+            })
         }).catch((err)=>{
             console.log(err);
             Alert.alert("","Please check your network connection");
@@ -161,7 +190,32 @@ class CheckInvites extends Component{
                         InvitedBy: InvitedBy
                     })
         }).then(()=>{
-            this.setState({Invites: InvitedBy});
+            this.FetchInvites();
+            firestore().collection('Events').doc(InvitedBy[index]).get().then(Event=>{
+                if(Event.data().Members!=null)
+                {
+                    for(var i=0;i<Event.data().Members.length;i++)
+                    {
+                        firestore().collection('Users').doc(Event.data().Members[i]).get().then(User=>{
+                            if(User.data().NotificationToken!=null)
+                            {
+                                axios.post("https://fcm.googleapis.com/fcm/send",{
+  "to" : User.data().NotificationToken,
+"data":{
+
+},
+},{
+  headers:{
+    Authorization: "key=AAAA7tNMKV0:APA91bEZHjBk7k1YayjyS_7HrM8rznxOyH-_1GHWH58hqyvmVMoBPMCCsQ23G-9W16gJhh2RyDVE4qSWn5y2QiX3MG39hv1javY_34IJNE5PpWdMKa-QHSXaXop8nxpZc5-VsP2OTzXd",
+    "Content-Type": "application/json"
+  },
+})
+                            }
+                        })
+
+                    }
+                }
+            })
         }).catch((err)=>{
             console.log(err);
             Alert.alert("","Please check your network connection");
