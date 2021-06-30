@@ -39,29 +39,16 @@ const Tab=createBottomTabNavigator();
                   }
               }}>
                   <Tab.Screen
-                  name="Events"
-                  component={Events}
+                  name="Check Events" 
+                  component={MyEvents}
                   options={{
-                      tabBarLabel: 'Events',
+                      tabBarLabel: 'My Events',
                       tabBarIcon: ()=>(
-                          <FontAwesomeIcon icon={faList} color="grey" size="28"/>
-                      ),
-                  }
-                  }
-                  initialParams={{
-                      userid: this.props.route.params.userid
-                  }}/>
-                  <Tab.Screen
-                  name="Info"
-                  component={Info}
-                  options={{
-                      tabBarLabel: 'Info',
-                      tabBarIcon: ()=>(
-                          <FontAwesomeIcon icon={faUser} color="grey" size="28"/>
+                          <FontAwesomeIcon icon={faMap} color="grey" size="28"/>
                       ),
                   }}
                   initialParams={{
-                    userid: this.props.route.params.userid
+                    UserID: this.props.route.params.userid
                 }}/>
                 <Tab.Screen
                   name="Check Invites"
@@ -75,19 +62,20 @@ const Tab=createBottomTabNavigator();
                   initialParams={{
                     UserID: this.props.route.params.userid
                 }}/>
-                <Tab.Screen
-                  name="Check Events"
-                  component={MyEvents}
+                  <Tab.Screen
+                  name="Events"
+                  component={Events}
                   options={{
                       tabBarLabel: 'Events',
                       tabBarIcon: ()=>(
-                          <FontAwesomeIcon icon={faMap} color="grey" size="28"/>
+                          <FontAwesomeIcon icon={faList} color="grey" size="28"/>
                       ),
-                  }}
+                  }
+                  }
                   initialParams={{
-                    UserID: this.props.route.params.userid
-                }}/>
-                <Tab.Screen
+                      userid: this.props.route.params.userid
+                  }}/>
+                  <Tab.Screen
                   name="Check Requests"
                   component={UserRequests}
                   options={{
@@ -98,6 +86,18 @@ const Tab=createBottomTabNavigator();
                   }}
                   initialParams={{
                     UserID: this.props.route.params.userid
+                }}/>
+                  <Tab.Screen
+                  name="Info"
+                  component={Info}
+                  options={{
+                      tabBarLabel: 'Info',
+                      tabBarIcon: ()=>(
+                          <FontAwesomeIcon icon={faUser} color="grey" size="28"/>
+                      ),
+                  }}
+                  initialParams={{
+                    userid: this.props.route.params.userid
                 }}/>
               </Tab.Navigator>
           )

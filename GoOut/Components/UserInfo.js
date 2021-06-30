@@ -10,7 +10,7 @@ import  ImagePicker from 'react-native-image-crop-picker'
 import * as Progress from 'react-native-progress';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
-class Info extends Component{
+class UserInfo extends Component{
     constructor(){
         super();
         this.state={
@@ -25,7 +25,9 @@ class Info extends Component{
                 ImageSelected: false,
                 Username:"",
                 ShowLoadingAnimation: false,
-                visitingID: ""
+                visitingID: "",
+                FirstName: "",
+                LastName: ""
         };
     }
     ConfirmChanges=()=>{
@@ -58,6 +60,14 @@ class Info extends Component{
                             {
                                 this.setState({Username: doc.data().Username});
                             }
+                            if(doc.data().FirstName!=null)
+                            {
+                                this.setState({FirstName: doc.data().FirstName});
+                            }
+                            if(doc.data().LastName!=null)
+                            {
+                                this.setState({LastName: doc.data().LastName});
+                            }
                         }
                     })
 
@@ -66,61 +76,6 @@ class Info extends Component{
                 Alert.alert("","Please connect to the internet"); 
             }
         });
-    }
-    InputNumber(value,code)
-    {
-        if (code==1)
-        {
-            this.setState({code: value});
-        }
-        else
-        {
-            this.setState({phone: value});
-        }
-    }
-    SignOut= async ()=>{
-        await AsyncStorage.setItem('Email',"");
-          await AsyncStorage.setItem('Password',"");
-        NetInfo.fetch().then((state)=>{
-            if(state.isConnected)
-            {
-                auth().signOut().then(  ()=>{
-                    this.props.navigation.navigate("Auth");
-                });
-            }
-            else{
-                Alert.alert("","Please connect to the internet"); 
-            }
-        })
-    }
-    SelectImage=()=>{
-        ImagePicker.openPicker({
-            cropping: true,
-            mediaType: 'photo'
-        }).then((Image)=>{
-            var StorageRef=storage().ref(`User/${this.props.route.params.userid}/ImagePic`);
-            StorageRef.putFile(Image.path).on(
-                storage.TaskEvent.STATE_CHANGED,
-                snapshot=>{
-                    if(snapshot.state==storage.TaskState.SUCCESS)
-                    {
-                        StorageRef.getDownloadURL().then(downloadUrl=>{
-                            var UserDoc=firestore().collection('Users').doc(this.props.route.params.userid);
-                            firestore().runTransaction(async transaction=>{
-                                transaction.update(UserDoc,{
-                                    Image: downloadUrl
-                                })
-                            }).then(()=>{
-                                this.setState({uri: downloadUrl});
-                            })
-                        })
-                    }
-                }
-            )
-
-        }).catch(err=>{
-
-        })
     }
     ShowAnimation=(value)=>{
         this.setState({ShowLoadingAnimation: value});
@@ -131,7 +86,7 @@ class Info extends Component{
     render(){
         return(
             <View style={styles.Background}>
-                <TouchableOpacity style={styles.ImageContainer} onPress={()=>{
+                <TouchableOpacity disabled={true} style={styles.ImageContainer} onPress={()=>{
                     this.SelectImage();
                 }}>
                 <Image source={
@@ -145,19 +100,14 @@ class Info extends Component{
                     justifyContent: 'space-evenly',
                     alignItems: 'center'
                 }}>
-                        <TextInput style={styles.TextFields} keyboardType={"phone-pad"} value={this.state.doc.Email} editable={false}/>
                     <TextInput style={styles.TextFields} value={this.state.Username} editable={false} onChange={(value)=>{
+                        this.setState({Username: value.nativeEvent.text});
+                    }}/>
+                    <TextInput style={styles.TextFields} value={this.state.FirstName+" "+this.state.LastName} editable={false} onChange={(value)=>{
                         this.setState({Username: value.nativeEvent.text});
                     }}/>
                         </View>
                         
-                    <View style={styles.ButtonContainer}>
-            <TouchableOpacity style={styles.Button} onPress={()=>{
-                this.SignOut();
-            }}>
-                <Text style={styles.Text3}>Logout</Text>
-            </TouchableOpacity>
-            </View>
                 </View>
         )
     }
@@ -228,4 +178,4 @@ const styles=StyleSheet.create({
 })
 
 
-export default Info;
+export default UserInfo;

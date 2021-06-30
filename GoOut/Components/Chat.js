@@ -186,6 +186,35 @@ class Chat extends Component{
                                 Messages: Messages
                               })
                           }).then(()=>{
+                            firestore().collection('Events').doc(this.props.eventid).get().then(Event=>{
+                                if(Event.data().Members!=null)
+                                {
+                                    for(var i=0;i<Event.data().Members.length;i++)
+                                    {
+                                        firestore().collection('Users').doc(Event.data().Members[i]).get().then(User=>{
+                                            if(User.data().NotificationToken!=null)
+                                            {
+                                                axios.post("https://fcm.googleapis.com/fcm/send",{
+                  "to" : User.data().NotificationToken,
+     "data":{
+    
+     },
+     "notification":{
+         "title": "GoOut",
+         "body": "You have received a message in "+Event.data().Name+" from "+this.state.User.Name
+     }
+    },{
+                  headers:{
+                    Authorization: "key=AAAA7tNMKV0:APA91bEZHjBk7k1YayjyS_7HrM8rznxOyH-_1GHWH58hqyvmVMoBPMCCsQ23G-9W16gJhh2RyDVE4qSWn5y2QiX3MG39hv1javY_34IJNE5PpWdMKa-QHSXaXop8nxpZc5-VsP2OTzXd",
+                    "Content-Type": "application/json"
+                  },
+              })
+                                            }
+                                        })
+    
+                                    }
+                                }
+                            })
                             }).catch(err=>{
                                 console.log(err);
             Alert.alert("","Please check your network connection");

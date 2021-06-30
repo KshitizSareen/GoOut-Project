@@ -147,7 +147,7 @@ class CheckInvites extends Component{
             Alert.alert("","Please check your network connection");
         })
     }
-    RemoveUser=(index)=>{
+    RemoveUser=(Event,index)=>{
         var InvitedBy=this.state.Invites;
         var EventDoc=firestore().collection('Events').doc(InvitedBy[index]);
         var UserDoc=firestore().collection('Users').doc(this.props.route.params.UserID);
@@ -191,7 +191,7 @@ class CheckInvites extends Component{
                     })
         }).then(()=>{
             this.FetchInvites();
-            firestore().collection('Events').doc(InvitedBy[index]).get().then(Event=>{
+            firestore().collection('Events').doc(Event).get().then(Event=>{
                 if(Event.data().Members!=null)
                 {
                     for(var i=0;i<Event.data().Members.length;i++)
@@ -237,6 +237,13 @@ class CheckInvites extends Component{
                             flexDirection: 'row'
                             
                         }}>
+                            <TouchableOpacity style={{
+                                flexDirection: 'row',
+                                width: 0.65*windowWidth,
+                                justifyContent: 'space-evenly'
+                            }} onPress={()=>{
+                                this.props.navigation.navigate("Content",{userid: this.props.route.params.UserID,eventid:data.item });
+                            }}>
                             <FastImage source={{
                                 uri: this.state.Images[data.index],
                                 priority: FastImage.priority.high,
@@ -246,7 +253,8 @@ class CheckInvites extends Component{
                                 borderRadius: 50,
                                 margin: '1%'
                             }}/>
-                            <Text style={{fontSize: 15,width: 0.55*windowWidth,alignSelf: 'center'}}>{"You have been invited to "+this.state.EventNames[data.index]}</Text>
+                            <Text style={{fontSize: 15,width: 0.5*windowWidth,alignSelf: 'center'}}>{"You have been invited to "+this.state.EventNames[data.index]}</Text>
+                            </TouchableOpacity>
                             <View style={{
                                 flexDirection: 'row',
                                 width: 0.3*windowWidth,
@@ -259,7 +267,7 @@ class CheckInvites extends Component{
                                 <FontAwesomeIcon icon={faCheck} size="20"/>
                             </TouchableOpacity>
                             <TouchableOpacity onPress={()=>{
-                                this.RemoveUser(data.index);
+                                this.RemoveUser(data.item,data.index);
                             }}>
                                 <FontAwesomeIcon icon={faTimes} size="20"/>
                             </TouchableOpacity>

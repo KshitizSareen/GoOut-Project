@@ -461,7 +461,7 @@ class EventInfo extends Component{
         marginBottom: '5%',
         fontSize: 20,
         padding: '1%',
-        width: 375,
+        width: 0.9*windowWidth,
         fontSize: 20,
         color: 'black'
 

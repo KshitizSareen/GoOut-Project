@@ -30,6 +30,9 @@ class EventUsers extends Component{
         firestore().collection('Events').doc(this.props.eventid).get().then(event=>{
             this.setState({Ownerid: event.data().Owner});
         })
+        messaging().onMessage(async mess=>{
+            this.SearchUsers(this.state.Username);
+        })
     }
     SearchUsers=(Username)=>{
         if(Username!="")
@@ -255,10 +258,12 @@ class EventUsers extends Component{
                             borderRadius: 10,
                             marginBottom: '2%'
                         }}>
-                            <View style={{
+                            <TouchableOpacity style={{
                                 flexDirection: 'row',
                                 justifyContent: 'space-between',
                                 alignItems: 'center'
+                            }} onPress={()=>{
+                                this.props.navigation.navigate("UserInfo",{userid: data.item.id})
                             }}>
                                 <FastImage style={{
                                     borderRadius: 30,
@@ -272,7 +277,7 @@ class EventUsers extends Component{
                             <View>
                             <Text style={{color: 'black',fontSize: 22,width: 0.7*windowWidth}}>{data.item.data().Username}</Text>
                             </View>
-                            </View>
+                            </TouchableOpacity>
                             {
                                 data.item.data().InvitedBy!=null && data.item.data().InvitedBy.includes(this.props.eventid) ? ShowRemove(data.index) : ShowAdd(data.item,data.index)
                             }

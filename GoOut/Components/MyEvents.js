@@ -152,7 +152,7 @@ class MyEvents extends Component{
                             width: 0.75*windowWidth,
                             justifyContent: 'space-evenly'
                         }} onPress={()=>{
-                            this.props.navigation.navigate("Content",{userid: this.props.route.params.UserID,eventid:data.item,EventName: this.state.EventNames[data.index]});
+                            this.props.navigation.navigate("Content",{userid: this.props.route.params.UserID,eventid:data.item});
                         }}>
                             <FastImage source={{
                                 uri: this.state.Images[data.index],

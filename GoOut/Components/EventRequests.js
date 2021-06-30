@@ -231,6 +231,13 @@ class EventRequests extends Component{
                             flexDirection: 'row'
                             
                         }}>
+                            <TouchableOpacity style={{
+                                flexDirection: 'row',
+                                width: 0.65*windowWidth,
+                                justifyContent: 'space-evenly'
+                            }} onPress={()=>{
+                                this.props.navigation.navigate("UserInfo",{userid: data.item})
+                            }}>
                             <FastImage source={{
                                 uri: this.state.Images[data.index],
                                 priority: FastImage.priority.high,
@@ -240,7 +247,8 @@ class EventRequests extends Component{
                                 borderRadius: 50,
                                 margin: '1%'
                             }}/>
-                            <Text style={{fontSize: 15,width: 0.55*windowWidth,alignSelf: 'center'}}>{this.state.UserNames[data.index]+" has requested to join the event"}</Text>
+                            <Text style={{fontSize: 15,width: 0.5*windowWidth,alignSelf: 'center'}}>{this.state.UserNames[data.index]+" has requested to join the event"}</Text>
+                            </TouchableOpacity>
                             <View style={{
                                 flexDirection: 'row',
                                 width: 0.3*windowWidth,

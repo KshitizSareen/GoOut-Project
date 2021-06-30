@@ -80,6 +80,8 @@ class Content extends Component{
                 {
                     this.setState({Invites: doc.data().Invites});
                 }
+                console.log(this.state.Invites);
+                !this.state.Members.includes(this.props.route.params.userid) ?  this.SetInfo() : null
             }
         });
     }
@@ -151,9 +153,31 @@ class Content extends Component{
                 EventRequests: EventRequests
             })
         }).then(()=>{
+            this.InitializeContent();
             firestore().collection('Users').doc(this.state.OwnerID).get().then((User)=>{
                 console.log(User.data());
-                if(User.data().Notification!=null)
+                if(User.data().NotificationToken!=null)
+                {
+                    axios.post("https://fcm.googleapis.com/fcm/send",{
+  "to" : User.data().NotificationToken,
+"data":{
+
+},
+"notification":{
+"title": "GoOut",
+"body":"You have requested to join "+this.state.Name
+}
+},{
+  headers:{
+    Authorization: "key=AAAA7tNMKV0:APA91bEZHjBk7k1YayjyS_7HrM8rznxOyH-_1GHWH58hqyvmVMoBPMCCsQ23G-9W16gJhh2RyDVE4qSWn5y2QiX3MG39hv1javY_34IJNE5PpWdMKa-QHSXaXop8nxpZc5-VsP2OTzXd",
+    "Content-Type": "application/json"
+  },
+})
+                }
+            })
+            firestore().collection('Users').doc(this.props.route.params.userid).get().then((User)=>{
+                console.log(User.data());
+                if(User.data().NotificationToken!=null)
                 {
                     axios.post("https://fcm.googleapis.com/fcm/send",{
   "to" : User.data().NotificationToken,
@@ -232,74 +256,10 @@ class Content extends Component{
                 <EventRequests userid={this.props.route.params.userid} eventid={this.props.route.params.eventid} navigation={this.props.navigation} OwnerId={this.state.OwnerID}/>
             )
         }
-    }   
+    } 
+    var DisplayOwnerPanel=()=>{
         return(
-            <View style={styles.Background}>
-                <View style={styles.Description}>
-                    <View style={{
-                        width: 0.5*windowWidth,
-                        justifyContent: 'space-evenly',
-                        alignItems: 'center',
-                        height: 0.25*windowHeight,
-                    }}>
-                    <TouchableOpacity disabled={this.state.OwnerID!=this.props.route.params.userid} onPress={()=>{
-                        this.SelectImage();
-                }}><FastImage source={{
-                    uri: this.state.ImageUri,
-                    priority: FastImage.priority.low
-                }} style={styles.Image} /></TouchableOpacity>
-                <View style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-evenly',
-                    width: 0.5*windowWidth
-                }}>
-                    <TouchableOpacity style={{
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    }} onPress={()=>{
-                        this.props.navigation.navigate("ShowMembers",{EventID: this.props.route.params.eventid,OwnerID: this.state.OwnerID,UserID: this.props.route.params.userid});
-                    }}>
-                        <Text style={{
-                            fontSize: 20
-                        }}>{this.state.NoOfMembers}</Text>
-                    <Text style={{
-                            fontSize: 13
-                        }}>Members</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={{
-                        justifyContent: 'center',
-                        alignItems: 'center'
-                    }} onPress={()=>{
-                        this.props.navigation.navigate("ShowInvites",{EventID: this.props.route.params.eventid,OwnerID: this.state.OwnerID,UserID: this.props.route.params.userid});
-                    }}>
-                        <Text style={{
-                            fontSize: 20
-                        }}>{this.state.NoOfInvites}</Text>
-                    <Text style={{
-                            fontSize: 13
-                        }}>Invites</Text>
-                    </TouchableOpacity>
-                </View>
-                {
-                    this.state.OwnerID!=this.props.route.params.userid && !this.state.Members.includes(this.props.route.params.userid) && !this.state.EventRequests.includes(this.props.route.params.userid) && !this.state.Invites.includes(this.props.route.params.userid)  ? 
-                    <TouchableOpacity onPress={()=>{
-    this.EnterEvent();
-}}>
-    <FontAwesomeIcon icon={faSignInAlt} size="30" color="lightblue"/>
-</TouchableOpacity> : null
-    }
-                </View>
-                    <View style={styles.TextContainer}> 
-            <Text style={styles.TextDetails}>{this.state.Date}</Text>
-            <Text style={styles.TextDetails}>{this.state.Time}</Text>
-                        {
-                            ShowPice()
-                        }
-                    </View>
-                </View>
-                {
-                    this.state.OwnerID==this.props.route.params.userid ? 
-                <View style={styles.Panel}>
+            <View style={styles.Panel}>
                     <TouchableOpacity style={{
         backgroundColor: '#dce8e7',
         height: 50,
@@ -356,8 +316,11 @@ class Content extends Component{
                         <FontAwesomeIcon icon={faUserFriends} color="lightblue" size="40"/>
                     </TouchableOpacity>
                 </View>
-                :
-                <View style={styles.Panel}>
+        )
+    }
+    var DisplayNotOwnerPanel=()=>{
+        return(
+            <View style={styles.Panel}>
                     <TouchableOpacity style={{
         backgroundColor: '#dce8e7',
         height: 50,
@@ -392,6 +355,100 @@ class Content extends Component{
                         <FontAwesomeIcon icon={faInfo} color="lightblue" size="40"/>
                     </TouchableOpacity>
                 </View>
+        )
+    } 
+    var DisplayInfoPanel=()=>{
+            return(
+                <View style={styles.Panel}>
+                        <TouchableOpacity style={{
+            backgroundColor: '#dce8e7',
+            height: 50,
+            justifyContent: 'center',
+            alignItems:'center',
+            width: windowWidth
+        }} onPress={()=>{
+                            this.SetInfo();
+                        }}>
+                            <FontAwesomeIcon icon={faInfo} color="lightblue" size="40"/>
+                        </TouchableOpacity>
+                    </View>
+            )
+    }
+        return(
+            <View style={styles.Background}>
+                <View style={styles.Description}>
+                    <View style={{
+                        width: 0.5*windowWidth,
+                        justifyContent: 'space-evenly',
+                        alignItems: 'center',
+                        height: 0.25*windowHeight,
+                    }}>
+                    <TouchableOpacity disabled={this.state.OwnerID!=this.props.route.params.userid} onPress={()=>{
+                        this.SelectImage();
+                }}><FastImage source={{
+                    uri: this.state.ImageUri,
+                    priority: FastImage.priority.low
+                }} style={styles.Image} /></TouchableOpacity>
+                <View style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-evenly',
+                    width: 0.5*windowWidth
+                }}>
+                    <TouchableOpacity style={{
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }} onPress={()=>{
+                        this.props.navigation.navigate("ShowMembers",{EventID: this.props.route.params.eventid,OwnerID: this.state.OwnerID,UserID: this.props.route.params.userid});
+                    }}>
+                        <Text style={{
+                            fontSize: 20
+                        }}>{this.state.NoOfMembers}</Text>
+                    <Text style={{
+                            fontSize: 13
+                        }}>Members</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }} onPress={()=>{
+                        this.props.navigation.navigate("ShowInvites",{EventID: this.props.route.params.eventid,OwnerID: this.state.OwnerID,UserID: this.props.route.params.userid});
+                    }}>
+                        <Text style={{
+                            fontSize: 20
+                        }}>{this.state.NoOfInvites}</Text>
+                    <Text style={{
+                            fontSize: 13
+                        }}>Invites</Text>
+                    </TouchableOpacity>
+                </View>
+                {
+                    this.state.OwnerID!=this.props.route.params.userid && !this.state.Members.includes(this.props.route.params.userid) && !this.state.EventRequests.includes(this.props.route.params.userid) && !this.state.Invites.includes(this.props.route.params.userid)  ? 
+                    <TouchableOpacity style={{
+                        backgroundColor: 'lightblue',
+                        borderRadius: 10,
+                        width: 0.25*windowWidth,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '2%'
+                    }} onPress={()=>{
+    this.EnterEvent();
+}}>
+    <Text>Enter Event</Text>
+</TouchableOpacity> : null
+    }
+                </View>
+                    <View style={styles.TextContainer}> 
+            <Text style={styles.TextDetails}>{this.state.Date}</Text>
+            <Text style={styles.TextDetails}>{this.state.Time}</Text>
+                        {
+                            ShowPice()
+                        }
+                    </View>
+                </View>
+                {
+                    this.state.OwnerID==this.props.route.params.userid ? DisplayOwnerPanel()
+                : this.state.Members.includes(this.props.route.params.userid) ?  DisplayNotOwnerPanel() : DisplayInfoPanel()
+                
 
             }
                             {

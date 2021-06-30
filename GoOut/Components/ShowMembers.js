@@ -57,6 +57,7 @@ class ShowMembers extends Component{
         var Members=this.state.Members;
         var UserDoc=firestore().collection('Users').doc(Members[index]);
         var EventDoc=firestore().collection('Events').doc(this.props.route.params.EventID)
+        var UserId=Members[index];
                 firestore().runTransaction(async transaction=>{
                     var doc=await transaction.get(UserDoc);
                     var MembersOf=[];
@@ -97,6 +98,22 @@ class ShowMembers extends Component{
                     })
                 }).then(()=>{
                     this.FetchMembers();
+                    firestore().collection('Users').doc(UserId).get().then(User=>{
+                        if(User.data().NotificationToken!=null)
+                                    {
+                                        axios.post("https://fcm.googleapis.com/fcm/send",{
+          "to" : User.data().NotificationToken,
+        "data":{
+        
+        },
+        },{
+          headers:{
+            Authorization: "key=AAAA7tNMKV0:APA91bEZHjBk7k1YayjyS_7HrM8rznxOyH-_1GHWH58hqyvmVMoBPMCCsQ23G-9W16gJhh2RyDVE4qSWn5y2QiX3MG39hv1javY_34IJNE5PpWdMKa-QHSXaXop8nxpZc5-VsP2OTzXd",
+            "Content-Type": "application/json"
+          },
+        })
+                                    }
+                    })
                     firestore().collection('Events').doc(this.props.route.params.EventID).get().then(Event=>{
                         if(Event.data().Members!=null)
                         {
@@ -143,6 +160,13 @@ class ShowMembers extends Component{
                             flexDirection: 'row'
                             
                         }}>
+                           <TouchableOpacity style={{
+                                flexDirection: 'row',
+                                width: 0.65*windowWidth,
+                                justifyContent: 'space-evenly'
+                            }} onPress={()=>{
+                                this.props.navigation.navigate("UserInfo",{userid: data.item})
+                            }}>
                             <FastImage source={{
                                 uri: this.state.Images[data.index],
                                 priority: FastImage.priority.high,
@@ -152,7 +176,8 @@ class ShowMembers extends Component{
                                 borderRadius: 50,
                                 margin: '1%'
                             }}/>
-                            <Text style={{fontSize: 15,width: 0.55*windowWidth,alignSelf: 'center'}}>{this.state.UserNames[data.index]}</Text>
+                            <Text style={{fontSize: 15,width: 0.5*windowWidth,alignSelf: 'center'}}>{this.state.UserNames[data.index]}</Text>
+                            </TouchableOpacity> 
                             {
                                 this.props.route.params.OwnerID == this.props.route.params.UserID ? 
                             <View style={{
