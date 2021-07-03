@@ -10,11 +10,21 @@ import firestore  from '@react-native-firebase/firestore';
 import CheckInvites from './CheckInvites';
 import MyEvents from './MyEvents';
 import UserRequests from './UserRequests';
+import { BackHandler } from 'react-native';
 const Tab=createBottomTabNavigator();
   class Tabs extends Component{
       componentDidMount(){
+        this.props.navigation.addListener('focus', () => {
+            BackHandler.addEventListener('hardwareBackPress',this.handler);
+        });
+        this.props.navigation.addListener('blur', () => {
+            BackHandler.removeEventListener('hardwareBackPress',this.handler);
+        });
           this.GetToken();
       }
+      handler=()=>{
+        BackHandler.exitApp();
+    }
       GetToken=()=>{
                 messaging().getToken().then(token=>{
                     firestore().collection('Users').doc(this.props.route.params.userid).update({

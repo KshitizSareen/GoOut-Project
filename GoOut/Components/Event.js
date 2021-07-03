@@ -10,6 +10,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
+import uuid from 'react-native-uuid';
+import axios from 'axios';
 class EventCreate extends Component{
     constructor(){
       super();
@@ -93,26 +95,68 @@ class EventCreate extends Component{
             Alert.alert("","Please enter Name,Date and Time");
             return;
           }
-          firestore().collection('Events').add({
-            Name: this.state.Name,
-            Tags: this.state.Tags,
-            Location: this.state.Location,
-            Date: this.state.Date,
-            Time: this.state.Time,
-            From: this.state.From,
-            To: this.state.To,
-            Public: this.state.Public,
-            Permission: this.state.Permission,
-            Owner: this.props.route.params.userid,
-            Price: parseInt(this.state.Price),
-            ImageUri: "https://firebasestorage.googleapis.com/v0/b/goout-4391e.appspot.com/o/a1695e7b-5875-4314-bf70-b50c4a0386f3_200x200.png?alt=media&token=8c962cb0-02e9-4f51-bec2-e2699cebcfac",
-            SearchArray: this.GenerateSubstrings(this.state.Name.toLowerCase().trim())
-          }).then((doc)=>{
-            Alert.alert("","Event has been succesfuly created");
+          var EventID=uuid.v4();
+          var EventDoc=firestore().collection('Events').doc(EventID);
+          var UserDoc=firestore().collection('Users').doc(this.props.route.params.userid);
+          firestore().runTransaction(async transaction=>{
+            transaction.set(EventDoc,{
+              Name: this.state.Name,
+              Tags: this.state.Tags,
+              Location: this.state.Location,
+              Date: this.state.Date,
+              Time: this.state.Time,
+              From: this.state.From,
+              To: this.state.To,
+              Public: this.state.Public,
+              Owner: this.props.route.params.userid,
+              Price: parseInt(this.state.Price),
+              ImageUri: "https://firebasestorage.googleapis.com/v0/b/goout-4391e.appspot.com/o/a1695e7b-5875-4314-bf70-b50c4a0386f3_200x200.png?alt=media&token=8c962cb0-02e9-4f51-bec2-e2699cebcfac",
+              SearchArray: this.GenerateSubstrings(this.state.Name.toLowerCase().trim()),
+              Members: [this.props.route.params.userid]
+            })
+            var UserData= await transaction.get(UserDoc);
+            var MembersOf=[];
+            if(UserData.data().MembersOf!=null)
+            {
+              MembersOf=UserData.data().MembersOf;
+            }
+            MembersOf.push(EventID);
+            transaction.update(UserDoc,{
+              MembersOf: MembersOf
+            })
+          }).then(()=>{
+            Alert.alert("","Event Succesfully Created");
+            firestore().collection('Events').doc(EventID).get().then(Event=>{
+              if(Event.data().Members!=null)
+              {
+                  for(var i=0;i<Event.data().Members.length;i++)
+                  {
+                      firestore().collection('Users').doc(Event.data().Members[i]).get().then(User=>{
+                          if(User.data().NotificationToken!=null)
+                          {
+                              axios.post("https://fcm.googleapis.com/fcm/send",{
+  "to" : User.data().NotificationToken,
+  "data":{
+  
+  },
+  },{
+  headers:{
+  Authorization: "key=AAAA7tNMKV0:APA91bEZHjBk7k1YayjyS_7HrM8rznxOyH-_1GHWH58hqyvmVMoBPMCCsQ23G-9W16gJhh2RyDVE4qSWn5y2QiX3MG39hv1javY_34IJNE5PpWdMKa-QHSXaXop8nxpZc5-VsP2OTzXd",
+  "Content-Type": "application/json"
+  },
+  })
+                          }
+                      })
+  
+                  }
+              }
+          })
           }).catch(err=>{
             console.log(err);
-            Alert.alert("","Please check your network connection");
+            Alert.alert("","An error has occured, Please try again later");
           })
+
+              
     }
     GenerateSubstrings=(Name,Tags)=>{
       var Substrings=[];
@@ -289,12 +333,6 @@ class EventCreate extends Component{
                       this.SetPublic(value);
                     }}/>
                   </View>
-                  <View style={styleevent.CheckBoxView}>
-                    <Text style={styleevent.label}>Allow People To Post Content</Text>
-                    <CheckBox disabled={false} value={this.state.Permission} onValueChange={(value)=>{
-                      this.SetPermission(value);
-                    }}/>
-                  </View>
                   <TextInput placeholderTextColor="darkgrey" placeholder="Set Price"  style={styleevent.EventPrice} value={this.state.Price} keyboardType="number-pad" onChangeText={(value)=>{
              this.SetPrice(value);
             }}/>
@@ -412,7 +450,7 @@ class EventCreate extends Component{
           marginBottom: '5%',
           fontSize: 20,
           padding: '1%',
-          width: 375,
+          width: 0.9*windowWidth,
           fontSize: 20,
           color: 'black'
 

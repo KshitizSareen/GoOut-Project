@@ -53,6 +53,60 @@ class Content extends Component{
         })
 
     }
+    SelectImage=()=>{
+        ImagePicker.openPicker({
+            cropping: true,
+            mediaType: 'photo'
+        }).then((Image)=>{
+            var StorageRef=storage().ref(`Event/${this.props.route.params.eventid}/ImagePic`);
+            StorageRef.putFile(Image.path).on(
+                storage.TaskEvent.STATE_CHANGED,
+                snapshot=>{
+                    if(snapshot.state==storage.TaskState.SUCCESS)
+                    {
+                        StorageRef.getDownloadURL().then(downloadUrl=>{
+                            var EventDoc=firestore().collection('Events').doc(this.props.route.params.eventid);
+                            firestore().runTransaction(async transaction=>{
+                                transaction.update(EventDoc,{
+                                    ImageUri: downloadUrl
+                                })
+                            }).then(()=>{
+                                this.setState({ImageUri: downloadUrl});
+                                EventDoc.get().then(Event=>{
+                                    if(Event.data().Members!=null)
+                                    {
+                                        for(var i=0;i<Event.data().Members.length;i++)
+                                        {
+                                            firestore().collection('Users').doc(Event.data().Members[i]).get().then(User=>{
+                                                if(User.data().NotificationToken!=null)
+                                                {
+                                                    axios.post("https://fcm.googleapis.com/fcm/send",{
+                      "to" : User.data().NotificationToken,
+                    "data":{
+                    
+                    },
+                    },{
+                      headers:{
+                        Authorization: "key=AAAA7tNMKV0:APA91bEZHjBk7k1YayjyS_7HrM8rznxOyH-_1GHWH58hqyvmVMoBPMCCsQ23G-9W16gJhh2RyDVE4qSWn5y2QiX3MG39hv1javY_34IJNE5PpWdMKa-QHSXaXop8nxpZc5-VsP2OTzXd",
+                        "Content-Type": "application/json"
+                      },
+                    })
+                                                }
+                                            })
+                    
+                                        }
+                                    }
+                                })
+                            })
+                        })
+                    }
+                }
+            )
+
+        }).catch(err=>{
+
+        })
+    }
     InitializeContent=()=>{
         firestore().collection('Events').doc(this.props.route.params.eventid).get().then((doc)=>{
             if(doc.exists)
@@ -433,7 +487,7 @@ class Content extends Component{
                     }} onPress={()=>{
     this.EnterEvent();
 }}>
-    <Text>Enter Event</Text>
+    <Text>Request Entry</Text>
 </TouchableOpacity> : null
     }
                 </View>

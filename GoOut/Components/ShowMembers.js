@@ -55,6 +55,11 @@ class ShowMembers extends Component{
     }
    RemoveUser=(index)=>{
         var Members=this.state.Members;
+        if(Members[index]==this.props.route.params.OwnerID)
+        {
+            Alert.alert("","Owner cannot be removed from the event");
+            return;
+        }
         var UserDoc=firestore().collection('Users').doc(Members[index]);
         var EventDoc=firestore().collection('Events').doc(this.props.route.params.EventID)
         var UserId=Members[index];
@@ -179,7 +184,7 @@ class ShowMembers extends Component{
                             <Text style={{fontSize: 15,width: 0.5*windowWidth,alignSelf: 'center'}}>{this.state.UserNames[data.index]}</Text>
                             </TouchableOpacity> 
                             {
-                                this.props.route.params.OwnerID == this.props.route.params.UserID ? 
+                                this.props.route.params.OwnerID == this.props.route.params.UserID  ? 
                             <View style={{
                                 flexDirection: 'row',
                                 width: 0.3*windowWidth,

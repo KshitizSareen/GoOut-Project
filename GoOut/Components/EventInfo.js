@@ -129,9 +129,8 @@ class EventInfo extends Component{
             From: this.state.From,
             To: this.state.To,
             Public: this.state.Public,
-            Permission: this.state.Permission,
-            Owner: this.props.userid,
             Price: parseInt(this.state.Price),
+            SearchArray: this.GenerateSubstrings(this.state.Name.toLowerCase().trim())
             })
           }).then(()=>{
             Alert.alert("","Event Succesfully Updated");
@@ -169,13 +168,27 @@ class EventInfo extends Component{
             Alert.alert("","Please check your network connection");
           })
     }
-
+    GenerateSubstrings=(Name,Tags)=>{
+      var Substrings=[];
+      for(var j=0;j<Name.length;j++)
+      {
+          var k=5;
+          while(k<Name.length)
+          {
+          var NameSubString=Name.substring(j,j+k);
+          Substrings.push(NameSubString);
+          k+=1;
+          }
+      }
+      Substrings.push(Name);
+      return Substrings;
+  }
     ShowTagModal=(value)=>{
       this.setState({TagModel: value});
     }
     AddTag=(Tag)=>{
       var Tags=this.state.Tags;
-      Tags.push('#'+Tag);
+      Tags.push('#'+Tag.toLowerCase().trim());
       this.setState({Tags: Tags});
       this.setState({Tag:""});
     }
@@ -330,12 +343,6 @@ class EventInfo extends Component{
                     <Text style={styleevent.label}>Keep Public</Text>
                     <CheckBox disabled={this.props.userid!=this.props.OwnerId} value={this.state.Public} onValueChange={(value)=>{
                       this.SetPublic(value);
-                    }}/>
-                  </View>
-                  <View style={styleevent.CheckBoxView}>
-                    <Text style={styleevent.label}>Allow People To Post Content</Text>
-                    <CheckBox disabled={this.props.userid!=this.props.OwnerId} value={this.state.Permission} onValueChange={(value)=>{
-                      this.SetPermission(value);
                     }}/>
                   </View>
                   </View> : null

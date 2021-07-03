@@ -51,7 +51,7 @@ class EventUsers extends Component{
                 this.setState({EventRequests: EventRequests});
                 this.setState({Members: Members});
             })
-            firestore().collection('Users').where("userid","!=",auth().currentUser.uid).where("SearchArray","array-contains",Username.toLowerCase()).limit(1000).get().then(res=>{
+            firestore().collection('Users').where("userid","!=",auth().currentUser.uid).where("SearchArray","array-contains",Username.toLowerCase().trim()).limit(1000).get().then(res=>{
                 this.setState({Users: res.docs});
             })
         }

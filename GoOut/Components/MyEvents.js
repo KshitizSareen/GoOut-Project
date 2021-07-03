@@ -22,6 +22,7 @@ class MyEvents extends Component{
             Events:[],
             Images:[],
             EventNames:[],
+            OwnerID:""
         }
     }
     componentDidMount(){
@@ -59,6 +60,7 @@ class MyEvents extends Component{
         var UserDoc=firestore().collection('Users').doc(this.props.route.params.UserID);
         var EventDoc=firestore().collection('Events').doc(Event);
         var MembersOf=[];
+        var CheckError=false;
         firestore().runTransaction(async transaction=>{
             var User=await transaction.get(UserDoc);
             if(User.data().MembersOf!=null)
@@ -79,6 +81,12 @@ class MyEvents extends Component{
                 MembersOf: MembersOf
             })
             var doc=await transaction.get(EventDoc);
+            if(doc.data().Owner==this.props.route.params.UserID)
+            {
+                Alert.alert("","Owner cannot be removed from the event");
+                CheckError=true;
+                throw '';
+            }
             var Members=[]
             if(doc.data().Members!=null)
             {
@@ -126,6 +134,7 @@ class MyEvents extends Component{
             })
         }).catch(err=>{
             console.log(err);
+            if(!CheckError)
             Alert.alert("","Please check your network connection");
         })
     }

@@ -25,6 +25,7 @@ class ImageEditing extends Component{
             Types:[],
             Yindex:[],
             marginIndex:[],
+            disableButton: false,
         }
     } 
     componentDidMount(){
@@ -218,10 +219,8 @@ class ImageEditing extends Component{
       }
 
       SendImage=()=>{
+          this.setState({disableButton: true});
           console.log(ImageArray);
-       NetInfo.fetch().then((state)=>{
-            if(state.isConnected)
-            {
                 var Paused=this.state.Paused;
                 for(var i=0;i<Paused.length;i++)
                 {
@@ -269,6 +268,7 @@ class ImageEditing extends Component{
                             }).then(()=>{
                                 this.props.route.params.SendMessage();
                                 this.setState({ShowIndicator: false});
+                                this.setState({disableButton: false});
                                 this.props.navigation.goBack();
                             });
 
@@ -291,6 +291,7 @@ class ImageEditing extends Component{
                                 }).then(()=>{
                                     this.props.route.params.LoadImage();
                                     this.setState({ShowIndicator: false});
+                                    this.setState({disableButton: false});
                                     this.props.navigation.goBack();
                                 })
                             })
@@ -381,12 +382,6 @@ class ImageEditing extends Component{
                 },
                 )
               })
-              }
-            else
-            {
-                Alert.alert("","Please connect to the internet");
-            }
-        })
       }
       HandleBackButton(){
           return true;
@@ -416,16 +411,11 @@ class ImageEditing extends Component{
                         <FontAwesomeIcon icon={faCrop} size="30" color="lightblue"/>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.ButtonStyle} onPress={()=>{
-                        this.FilterImage();
-                    }}>
-                        <FontAwesomeIcon icon={faFilter} size="30" color="lightblue"/>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.ButtonStyle} onPress={()=>{
                         this.UndoImage();
                     }}>
                         <FontAwesomeIcon icon={faUndo} size="30" color="lightblue"/>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.ButtonStyle} onPress={()=>{
+                    <TouchableOpacity disabled={this.state.disableButton} style={styles.ButtonStyle} onPress={()=>{
                         this.SendImage();
                     }}>
                         <FontAwesomeIcon icon={faArrowRight} size="30" color="lightblue"/>
@@ -512,7 +502,6 @@ class ImageEditing extends Component{
                     ShowLowerContainer()
                  }
                  {
-                     ShowProgressIndicator()
                  }
                  </View> 
                   )
