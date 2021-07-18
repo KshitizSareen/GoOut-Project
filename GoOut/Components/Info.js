@@ -1,13 +1,12 @@
 import React, {Component} from 'react';
 import NetInfo from '@react-native-community/netinfo';
-import { View,StyleSheet,Image,Text, Alert, BackHandler,Dimensions } from 'react-native';
+import { View,StyleSheet,Image,Text, Alert,Dimensions } from 'react-native';
 import {TextInput, TouchableOpacity } from 'react-native-gesture-handler';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-community/async-storage';
 import storage from '@react-native-firebase/storage';
 import  ImagePicker from 'react-native-image-crop-picker'
-import * as Progress from 'react-native-progress';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 class Info extends Component{

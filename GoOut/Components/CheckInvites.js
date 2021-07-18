@@ -1,17 +1,11 @@
 import React, {Component} from 'react';
-import NetInfo from '@react-native-community/netinfo';
-import { View,StyleSheet,Text, Alert,Dimensions,TouchableOpacity, TextInput,Image } from 'react-native';
-import { FlatList, ScrollView } from 'react-native-gesture-handler';
+import { View,Text, Alert,Dimensions,TouchableOpacity } from 'react-native';
+import { FlatList } from 'react-native-gesture-handler';
 import firestore from '@react-native-firebase/firestore';
-import CheckBox from '@react-native-community/checkbox';
-import DateTimePickerModal from "react-native-modal-datetime-picker";
-import Modal from 'react-native-modal';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faCannabis, faCheck, faCross, faInbox, faMinus, faPlus, faTimes } from '@fortawesome/free-solid-svg-icons';
+import {  faCheck, faInbox,  faTimes } from '@fortawesome/free-solid-svg-icons';
 const windowWidth = Dimensions.get('window').width;
-const windowHeight = Dimensions.get('window').height;
 import FastImage from 'react-native-fast-image';
-import auth from '@react-native-firebase/auth';
 import messaging from '@react-native-firebase/messaging';
 import axios from 'axios';
 
@@ -66,7 +60,9 @@ class CheckInvites extends Component{
             {
                 Members=Event.data().Members;
             }
-            Members.push(this.props.route.params.UserID );
+            var MemebrsSet=new Set(Members);
+            MemebrsSet.add(this.props.route.params.UserID);
+            Members=Array.from(MemebrsSet);
             var Invites=[];
             if(Event.data().Invites!=null)
             {
@@ -92,7 +88,9 @@ class CheckInvites extends Component{
                 {
                     MembersOf=User.data().MembersOf;
                 }
-                MembersOf.push(Invite)
+                var MembersOfSet=new Set(MembersOf);
+                MembersOfSet.add(Invite);
+                MembersOf=Array.from(MembersOfSet);
                 if(User.data().InvitedBy!=null)
                 {
                     InvitedBy=User.data().InvitedBy;
@@ -121,14 +119,15 @@ class CheckInvites extends Component{
                         firestore().collection('Users').doc(Event.data().Members[i]).get().then(User=>{
                             if(User.data().NotificationToken!=null)
                             {
-                                axios.post("https://fcm.googleapis.com/fcm/send",{
+                                UserDoc.get().then(UserData=>{
+                                    axios.post("https://fcm.googleapis.com/fcm/send",{
   "to" : User.data().NotificationToken,
 "data":{
 
 },
 "notification":{
 "title": "GoOut",
-"body": User.data().Username +" has joined "+Event.data().Name
+"body": UserData.data().Username +" has joined "+Event.data().Name
 }
 },{
   headers:{
@@ -136,6 +135,7 @@ class CheckInvites extends Component{
     "Content-Type": "application/json"
   },
 })
+                                })
                             }
                         })
 

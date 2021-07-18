@@ -1,8 +1,6 @@
 import React, {Component} from 'react';
-import NetInfo from '@react-native-community/netinfo';
-import { View,StyleSheet,Text,Image, Alert, TouchableOpacity,FlatList, ScrollView, Animated,Dimensions, BackHandler} from 'react-native';
+import { View,StyleSheet,Text, Alert, TouchableOpacity, Animated,Dimensions} from 'react-native';
 import firestore  from '@react-native-firebase/firestore';
-import * as Progress from 'react-native-progress';
 import messaging from '@react-native-firebase/messaging';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -15,7 +13,7 @@ import FastImage from 'react-native-fast-image';
 import storage from '@react-native-firebase/storage';
 import EventUsers from './EventUsers.js';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faBook, faBookReader, faBug, faClipboardList, faComment, faImage, faInfo, faList, faSignInAlt, faSignOutAlt, faTag, faTextHeight, faUser, faUserCircle, faUserFriends, faWindowClose } from '@fortawesome/free-solid-svg-icons';
+import {  faComment, faImage, faInfo, faUserCircle, faUserFriends } from '@fortawesome/free-solid-svg-icons';
 import EventRequests from './EventRequests.js';
 import axios from 'axios';
 class Content extends Component{
@@ -45,9 +43,11 @@ class Content extends Component{
         };
       }
     componentDidMount(){
+        this.unsubscribe=this.props.navigation.addListener('focus',()=>{
+            this.InitializeContent();
+        })
         userid=this.props.route.params.userid;
-                this.SetChat();
-                this.InitializeContent();
+        this.SetChat();
         messaging().onMessage(async mess=>{
             this.InitializeContent();
         })
@@ -134,7 +134,6 @@ class Content extends Component{
                 {
                     this.setState({Invites: doc.data().Invites});
                 }
-                console.log(this.state.Invites);
                 !this.state.Members.includes(this.props.route.params.userid) ?  this.SetInfo() : null
             }
         });
@@ -187,12 +186,13 @@ class Content extends Component{
         firestore().runTransaction(async transaction=>{
             var doc=await transaction.get(UserDoc);
             var UserRequests=[];
-            console.log(UserRequests);
             if(doc.data().UserRequests!=null)
             {
                 UserRequests=doc.data().UserRequests;
             }
-            UserRequests.push(this.props.route.params.eventid);
+            var UserRequestsSet=new Set(UserRequests);
+            UserRequestsSet.add(this.props.route.params.eventid);
+            UserRequests=Array.from(UserRequestsSet);
             transaction.update(UserDoc,{
                 UserRequests: UserRequests
             })
@@ -202,62 +202,46 @@ class Content extends Component{
             {
                 EventRequests=doc.data().EventRequests;
             }
-            EventRequests.push(this.props.route.params.userid)
+            var EventRequestsSet=new Set(EventRequests);
+            EventRequestsSet.add(this.props.route.params.userid);
+            EventRequests=Array.from(EventRequestsSet);
             transaction.update(EventDoc,{
                 EventRequests: EventRequests
             })
         }).then(()=>{
             this.InitializeContent();
             firestore().collection('Users').doc(this.state.OwnerID).get().then((User)=>{
-                console.log(User.data());
                 if(User.data().NotificationToken!=null)
                 {
-                    axios.post("https://fcm.googleapis.com/fcm/send",{
-  "to" : User.data().NotificationToken,
-"data":{
-
-},
-"notification":{
-"title": "GoOut",
-"body":"You have requested to join "+this.state.Name
-}
-},{
-  headers:{
-    Authorization: "key=AAAA7tNMKV0:APA91bEZHjBk7k1YayjyS_7HrM8rznxOyH-_1GHWH58hqyvmVMoBPMCCsQ23G-9W16gJhh2RyDVE4qSWn5y2QiX3MG39hv1javY_34IJNE5PpWdMKa-QHSXaXop8nxpZc5-VsP2OTzXd",
-    "Content-Type": "application/json"
-  },
-})
-                }
-            })
-            firestore().collection('Users').doc(this.props.route.params.userid).get().then((User)=>{
-                console.log(User.data());
-                if(User.data().NotificationToken!=null)
-                {
-                    axios.post("https://fcm.googleapis.com/fcm/send",{
-  "to" : User.data().NotificationToken,
-"data":{
-
-},
-"notification":{
-"title": "GoOut",
-"body":"You have requested to join "+this.state.Name
-}
-},{
-  headers:{
-    Authorization: "key=AAAA7tNMKV0:APA91bEZHjBk7k1YayjyS_7HrM8rznxOyH-_1GHWH58hqyvmVMoBPMCCsQ23G-9W16gJhh2RyDVE4qSWn5y2QiX3MG39hv1javY_34IJNE5PpWdMKa-QHSXaXop8nxpZc5-VsP2OTzXd",
-    "Content-Type": "application/json"
-  },
-})
-                }
-            })
-        }).catch(err=>{
-            console.log(err);
-            Alert.alert("","Please check your network connection");
+                    firestore().collection('Users').doc(this.props.route.params.userid).get().then((UserData)=>{
+                            axios.post("https://fcm.googleapis.com/fcm/send",{
+          "to" : User.data().NotificationToken,
+        "data":{
+        
+        },
+        "notification":{
+            "title": "GoOut",
+            "body": UserData.data().Username +" has requested to join "+this.state.Name
+            }
+        },{
+          headers:{
+            Authorization: "key=AAAA7tNMKV0:APA91bEZHjBk7k1YayjyS_7HrM8rznxOyH-_1GHWH58hqyvmVMoBPMCCsQ23G-9W16gJhh2RyDVE4qSWn5y2QiX3MG39hv1javY_34IJNE5PpWdMKa-QHSXaXop8nxpZc5-VsP2OTzXd",
+            "Content-Type": "application/json"
+          },
         })
+                }).catch(err=>{
+                    console.log(err);
+                    Alert.alert("","Please check your network connection");
+                })
+            }
+        })
+    })
+            
 
     }
                 
     componentWillUnmount(){
+        this.unsubscribe();
     }
     render()
     {

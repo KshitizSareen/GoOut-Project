@@ -20,7 +20,6 @@ class ChatMedia extends Component{
     }
     componentDidMount(){
         currentIndex=0;
-        console.log(this.props.route.params.Images);
         UserId=this.props.route.params.UserId;
         var i=0;
         this.props.route.params.Images.forEach((Image)=>{
@@ -69,7 +68,6 @@ class ChatMedia extends Component{
             this.setState({Paused:Paused});
             i+=1;
         });
-        console.log(this.state.ImagesUri);
     }
     viewabilityConfig = {
         viewAreaCoveragePercentThreshold: 50,
@@ -81,16 +79,13 @@ class ChatMedia extends Component{
             Paused[currentIndex]=true;
             Paused[viewableItems[0].index]=false;
             this.setState({Paused:Paused});
-            console.log(viewableItems[0].index);
             this.setState({index:viewableItems[0].index})
-            currentIndex=viewableItems[0].index;
-            console.log(this.state.Paused);            
+            currentIndex=viewableItems[0].index;           
       }
     }
     DisplayImages=  (ImageUri,index)=>{
         ImageFilterModule.CheckImageOrientation(ImageUri).then((res)=>{
                var WH=res.split(',').map(Number);
-               console.log(WH)
            var yaxis=(WH[1]/(WH[0]))*windowWidth;
            var yindex=this.state.yindex;
            var marginIndex=this.state.marginIndex;

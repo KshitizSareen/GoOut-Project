@@ -16,7 +16,6 @@ class PlayMedia extends Component{
         }
         componentDidMount(){
             currentIndex=0;
-           console.log(this.props.route.params.Message);
            var ShowVideos=this.state.ShowVideos; 
            this.props.route.params.Message.forEach((MessageObject,index)=>{
                RNFetchBlob.fs.exists(RNFetchBlob.fs.dirs.PictureDir+'/GoOut/'+MessageObject.FilePath).then((async res=>{  
@@ -39,7 +38,6 @@ class PlayMedia extends Component{
                     })
                     .then((result) => {
                       // the temp file path
-                      console.log('The file saved to ', result.path())
                       var ShowVideos=this.state.ShowVideos;
                       ShowVideos[index]=true;
                       this.setState({ShowVideos:ShowVideos});
@@ -59,7 +57,6 @@ class PlayMedia extends Component{
                 Paused[currentIndex]=true;
                 Paused[viewableItems[0].index]=false;
                 this.setState({Paused:Paused});
-                console.log(viewableItems[0].index);
                 this.setState({index:viewableItems[0].index})
                 currentIndex=viewableItems[0].index;          
           }

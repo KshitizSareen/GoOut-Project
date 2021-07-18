@@ -1,15 +1,10 @@
 import React, {Component} from 'react';
-import NetInfo from '@react-native-community/netinfo';
-import { View,StyleSheet,Text, Alert,Dimensions,TouchableOpacity, TextInput,Image } from 'react-native';
-import { FlatList, ScrollView } from 'react-native-gesture-handler';
+import { View,StyleSheet,Text, Alert,Dimensions,TouchableOpacity, TextInput } from 'react-native';
+import { FlatList } from 'react-native-gesture-handler';
 import firestore from '@react-native-firebase/firestore';
-import CheckBox from '@react-native-community/checkbox';
-import DateTimePickerModal from "react-native-modal-datetime-picker";
-import Modal from 'react-native-modal';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
 const windowWidth = Dimensions.get('window').width;
-const windowHeight = Dimensions.get('window').height;
 import FastImage from 'react-native-fast-image';
 import auth from '@react-native-firebase/auth';
 import messaging from '@react-native-firebase/messaging';
@@ -66,7 +61,9 @@ class EventUsers extends Component{
                   {
                       InvitedEvents=UserData.data().InvitedBy;
                   }
-                  InvitedEvents.push(this.props.eventid);
+                  var InvitedEventsSet=new Set(InvitedEvents);
+                  InvitedEventsSet.add(this.props.eventid);
+                  InvitedEvents=Array.from(InvitedEventsSet);
                   transaction.update(UserDoc,{
                     InvitedBy: InvitedEvents
                   })
@@ -76,7 +73,9 @@ class EventUsers extends Component{
                           {
                               Invites=Event.data().Invites;
                           }
-                          Invites.push(User.id);
+                          var InvitesSet=new Set(Invites);
+                          InvitesSet.add(User.id);
+                          Invites=Array.from(InvitesSet);
                           transaction.update(EventDoc,{
                             Invites: Invites
                           })
@@ -123,7 +122,6 @@ class EventUsers extends Component{
                         }
             })
         }).catch(err=>{
-            console.log(err);
             Alert.alert("","Please check your network connection");
         })
     }

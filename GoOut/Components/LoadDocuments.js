@@ -1,11 +1,9 @@
 import React, {Component} from 'react';
-import NetInfo from '@react-native-community/netinfo';
-import { View,StyleSheet,Text, Alert, TouchableOpacity,FlatList, Dimensions} from 'react-native';
+import { View,StyleSheet,Text, TouchableOpacity,FlatList, Dimensions} from 'react-native';
 import * as Progress from 'react-native-progress';
 import RNFetchBlob from 'rn-fetch-blob';
 import FileViewer from 'react-native-file-viewer';
 const windowWidth = Dimensions.get('window').width;
-const windowHeight = Dimensions.get('window').height;
 class LoadDocuments extends Component{
     constructor(){
         super();
@@ -41,8 +39,6 @@ class LoadDocuments extends Component{
                                              RNFetchBlob.fs.exists(RNFetchBlob.fs.dirs.DocumentDir+'/'+data.item.FilePath).then(async res=>{
                                                  if(res==true)
                                                  {
-                                                     console.log("Exists");
-                                                     console.log(RNFetchBlob.fs.dirs.DocumentDir+'/'+data.item.FilePath);
                                                     FileViewer.open("file://"+RNFetchBlob.fs.dirs.DocumentDir+'/'+data.item.FilePath);
                                                  }
                                                  else
@@ -65,7 +61,6 @@ class LoadDocuments extends Component{
                                                       var ShowLoadingIndicator=this.state.ShowLoadingIndicator;
                                                      ShowLoadingIndicator[data.index]=false;
                                                      this.setState({ShowLoadingIndicator: ShowLoadingIndicator});
-                                                      console.log('The file saved to ', result.path());
                                                       FileViewer.open("file://"+RNFetchBlob.fs.dirs.DocumentDir+'/'+data.item.FilePath);
                                                     })
                                                  }

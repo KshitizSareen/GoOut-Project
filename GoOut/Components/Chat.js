@@ -1,12 +1,10 @@
 import React, {Component} from 'react';
 import NetInfo from '@react-native-community/netinfo';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {faArrowAltCircleRight, faFile, faImage,faPlay,faUpload} from '@fortawesome/free-solid-svg-icons';
-import { View,StyleSheet,Text,Alert,TouchableOpacity,FlatList,  TextInput,Dimensions,BackHandler} from 'react-native';
+import {faArrowAltCircleRight, faFile,faUpload} from '@fortawesome/free-solid-svg-icons';
+import { View,StyleSheet,Text,Alert,TouchableOpacity,FlatList,  TextInput,Dimensions} from 'react-native';
 import firestore  from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
-import Modal from 'react-native-modal';
-import ImagePicker from 'react-native-image-crop-picker';
 import DocumentPicker from 'react-native-document-picker';
 const windowWidth = Dimensions.get('window').width;
 import RNFetchBlob from 'rn-fetch-blob';
@@ -103,7 +101,7 @@ class Chat extends Component{
 
                                 }
                             }
-                        })
+                        }) 
                     }).catch(err=>{
                         console.log(err);
             Alert.alert("","Please check your network connection");
@@ -129,16 +127,13 @@ class Chat extends Component{
               type: [DocumentPicker.types.allFiles],
             });
             for (const res of results) {
-                console.log(res.uri);
                 const uriComponents = res.uri.split('/');
                 const destPath = `${RNFetchBlob.fs.dirs.DocumentDir}/${this.props.userid}${res.name}`;
                 var FileObject={};
                 FileObject.FilePath=`${this.props.userid}${res.name}`;
                 FileObject.DestPath="file://"+destPath;
                 FileObject.FileName=res.name;
-                console.log(destPath);
                 await RNFS.copyFile(res.uri, destPath);
-                console.log(destPath);
                 ResultUris.push(FileObject);
             }
             const SendPDFInterval=setInterval(()=>{
@@ -154,10 +149,7 @@ class Chat extends Component{
               storageRef.putFile(File.DestPath).on(
                 storage.TaskEvent.STATE_CHANGED,
                 snapshot=>{
-                  console.log("snapshot: "+snapshot.state);
-                  console.log("progress: "+(snapshot.bytesTransferred/snapshot.totalBytes)*100);
                   if(snapshot.state==storage.TaskState.SUCCESS){
-                    console.log("Success");
                     storageRef.getDownloadURL().then(downloadurl=>{
                         if(!Set.includes(downloadurl))
                         {
@@ -167,12 +159,8 @@ class Chat extends Component{
                         FileObject.FilePath=File.FilePath;
                         FileObject.FileName=File.FileName;
                         Message.push(FileObject);
-                        /*RNFetchBlob.fs.unlink(File.DestPath).then(()=>{
-                            console.log("File Deleted");
-                        });*/
                       if(Set.length==ResultUris.length)
                       {
-                          console.log("Twice");
                           var EventDoc=firestore().collection('Events').doc(this.props.eventid);
                           firestore().runTransaction(async transaction=>{
                               var res=await transaction.get(EventDoc);

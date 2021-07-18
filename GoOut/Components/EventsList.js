@@ -1,22 +1,8 @@
 import React, {Component} from 'react';
-import NetInfo from '@react-native-community/netinfo';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {faSearch,faWindowClose,faCheck, faPlus} from '@fortawesome/free-solid-svg-icons';
-import { View,StyleSheet,Image,Text, Alert,Dimensions} from 'react-native';
+import { View,StyleSheet,Image,Text,Dimensions} from 'react-native';
 import { FlatList, TextInput, TouchableOpacity } from 'react-native-gesture-handler';
 import firestore from '@react-native-firebase/firestore';
-import SectionedMultiSelect from 'react-native-sectioned-multi-select';
 const windowWidth = Dimensions.get('window').width;
-const windowHeight = Dimensions.get('window').height;
-  const items = [
-      // this is the parent or 'item'
-      {
-        name: 'Tags',
-        id: 0,
-        // these are the children or 'sub items'
-      },
-    
-    ];
 class Events extends Component{
     constructor() {
         super();
@@ -47,7 +33,6 @@ class Events extends Component{
                 Events.push(TagResults.docs[i]);
               }
             }
-            console.log(Events);
             this.setState({Events: Events});
           })
         })

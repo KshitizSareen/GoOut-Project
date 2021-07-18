@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { View,StyleSheet,Image,FlatList} from 'react-native';
+import { View} from 'react-native';
 import { Dimensions } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import Video from 'react-native-video';
@@ -19,8 +19,6 @@ class LoadMedia extends Component{
         }
     }
     componentDidMount(){
-        console.log(windowWidth);
-        console.log(windowHeight);
         var MediaObject=this.props.route.params.MediaFile;
         var yindex;
         var marginIndex;
@@ -34,7 +32,6 @@ class LoadMedia extends Component{
             yindex=(MediaObject.Height/MediaObject.Width)*windowWidth;
             marginIndex=(0.9-yindex/windowHeight)/2;
         }
-        //console.log(yindex);
         this.setState({yindex:yindex});
         this.setState({marginIndex:marginIndex});
     }

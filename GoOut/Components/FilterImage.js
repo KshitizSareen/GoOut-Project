@@ -6,7 +6,6 @@ import { Dimensions } from 'react-native';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 import {ImageFilterModule}  from './Modules';
-import RNFetchBlob from 'rn-fetch-blob';
 var Codes=[0,1,5,6,10,11,12,14,16,17,19]
 class FilterImage extends Component{
     constructor(){
@@ -26,9 +25,7 @@ class FilterImage extends Component{
         });
         this.setState({FilteredUris: [...this.state.FilteredUris,this.props.route.params.ImageUri]});
         ImageFilterModule.CheckImageOrientation(this.props.route.params.ImageUri).then((res)=>{
-            console.log(res);
             var WH=res.split(',').map(Number);
-            console.log(WH);
             var yaxis=(WH[1]/(WH[0]))*windowWidth;
             if(yaxis>(0.65*windowHeight))
             {
@@ -44,7 +41,6 @@ class FilterImage extends Component{
         }).then(()=>{
             ImageFilterModule.GetGreyFilter().then((res)=>{
                 this.TrashArray.push("file://"+res);
-                console.log(res);
                 this.setState({FilteredUris: [...this.state.FilteredUris,"file://"+res]});
                 this.SetImageUris();
 
@@ -60,7 +56,6 @@ class FilterImage extends Component{
         {
         await ImageFilterModule.ProcessImage(Codes[i]).then((res)=>{
             this.TrashArray.push("file://"+res);
-            console.log(res.replace(" ",""));
             this.setState({FilteredUris: [...this.state.FilteredUris,"file://"+res]});
         });
     }
@@ -92,7 +87,6 @@ class FilterImage extends Component{
                                </TouchableOpacity>
                                <FlatList horizontal={true} data={this.state.FilteredUris} renderItem={(data)=>
                                {
-                                   console.log(data.item);
                                    return(
                                        <TouchableOpacity onPress={()=>{
                                            this.SetImage(data.item);

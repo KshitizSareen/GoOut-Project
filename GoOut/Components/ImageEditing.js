@@ -1,13 +1,12 @@
 import React, {Component} from 'react';
-import { View,StyleSheet,Image,TouchableOpacity,FlatList, Alert, BackHandler} from 'react-native';
+import { View,StyleSheet,Image,TouchableOpacity,FlatList} from 'react-native';
 import { Dimensions } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faArrowRight, faCrop, faFilter, faUndo} from '@fortawesome/free-solid-svg-icons';
+import { faArrowRight, faCrop,faUndo} from '@fortawesome/free-solid-svg-icons';
 import Video from 'react-native-video';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 import {ImageFilterModule} from './Modules';
-import NetInfo from '@react-native-community/netinfo';
 import storage from '@react-native-firebase/storage';
 import * as Progress from 'react-native-progress';
 import firestore  from '@react-native-firebase/firestore';
@@ -107,20 +106,16 @@ class ImageEditing extends Component{
             Paused[currentIndex]=true;
             Paused[viewableItems[0].index]=false;
             this.setState({Paused:Paused});
-            console.log(viewableItems[0].index);
             this.setState({index:viewableItems[0].index})
-            currentIndex=viewableItems[0].index;
-            console.log(this.state.Paused);            
+            currentIndex=viewableItems[0].index;         
       }
     }
       OpenCropper=()=>{
         ImagePicker.openCropper({
             path: this.state.ImagesUri[this.state.index]}).then((ImageUri)=>{
-            console.log(ImageUri);
             ImageFilterModule.CheckImageOrientation(ImageUri.path).then((res)=>{
                 var index=this.state.index;
                 var WH=res.split(',').map(Number);
-                console.log(WH)
             var yaxis=(WH[1]/(WH[0]))*windowWidth;
             ImageArray[this.state.index].Width=WH[0];
         ImageArray[this.state.index].Height=WH[1];
@@ -161,7 +156,6 @@ class ImageEditing extends Component{
         ImageFilterModule.CheckImageOrientation(this.props.route.params.Images[this.state.index].path).then((res)=>{
             var index=this.state.index;
             var WH=res.split(',').map(Number);
-            console.log(WH)
         var yaxis=(WH[1]/(WH[0]))*windowWidth;
         ImageArray[this.state.index].Width=WH[0];
         ImageArray[this.state.index].Height=WH[1];
@@ -191,7 +185,6 @@ class ImageEditing extends Component{
       DisplayImages=  (ImageUri,index)=>{
      ImageFilterModule.CheckImageOrientation(ImageUri).then((res)=>{
             var WH=res.split(',').map(Number);
-            console.log(WH)
             ImageArray[index].Width=WH[0];
             ImageArray[index].Height=WH[1];
         var yaxis=(WH[1]/(WH[0]))*windowWidth;
@@ -211,16 +204,12 @@ class ImageEditing extends Component{
             this.setState({Yindex: Yindex});
             this.setState({marginIndex: marginIndex});
         }
-        console.log(this.state.ImagesUri);
-        console.log("Images:");
-        console.log(ImageArray);
     });
             
       }
 
       SendImage=()=>{
           this.setState({disableButton: true});
-          console.log(ImageArray);
                 var Paused=this.state.Paused;
                 for(var i=0;i<Paused.length;i++)
                 {
@@ -282,7 +271,6 @@ class ImageEditing extends Component{
                                     Media=res.data().Media;
                                 }
                                 MediaArray.forEach(MediaFile=>{
-                                    console.log(MediaFile);
                                     Media.unshift(MediaFile);
                                 })
                             }).then(()=>{
@@ -314,10 +302,7 @@ class ImageEditing extends Component{
               storageRef.putFile(File.Uri).on(
                 storage.TaskEvent.STATE_CHANGED,
                 snapshot=>{
-                  console.log("snapshot: "+snapshot.state);
-                  console.log("progress: "+(snapshot.bytesTransferred/snapshot.totalBytes)*100);
                   if(snapshot.state==storage.TaskState.SUCCESS){
-                    console.log("Success");
                     storageRef.getDownloadURL().then(downloadurl=>{
                         if(!Set.includes(downloadurl))
                         {
@@ -351,7 +336,6 @@ class ImageEditing extends Component{
                             storageRefThumbnail.putFile(File.thumbnailpath).on(
                                 storage.TaskEvent.STATE_CHANGED,
                                 snapshotThumbnail=>{
-                                    console.log("Thumbnail snapshot: "+snapshotThumbnail.state);
                                     if(snapshotThumbnail.state==storage.TaskState.SUCCESS)
                                     {
                                         storageRefThumbnail.getDownloadURL().then(downloadurlThumbnail=>{

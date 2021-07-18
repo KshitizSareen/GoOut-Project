@@ -1,13 +1,12 @@
 import React, {Component} from 'react';
-import NetInfo from '@react-native-community/netinfo';
 import { View,StyleSheet,Text, Alert,Dimensions,TouchableOpacity } from 'react-native';
-import { FlatList, ScrollView, TextInput } from 'react-native-gesture-handler';
+import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import firestore from '@react-native-firebase/firestore';
 import CheckBox from '@react-native-community/checkbox';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import Modal from 'react-native-modal';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faMinus } from '@fortawesome/free-solid-svg-icons';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 import uuid from 'react-native-uuid';

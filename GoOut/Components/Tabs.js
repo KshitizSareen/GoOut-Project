@@ -1,11 +1,10 @@
 import React, {Component} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {faEnvelope, faEnvelopeOpenText, faInbox, faList,  faMap,  faUser} from '@fortawesome/free-solid-svg-icons';
+import {faEnvelope, faEnvelopeOpenText,  faList,  faMap,  faUser} from '@fortawesome/free-solid-svg-icons';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Events from './EventsList';
 import Info from './Info';
 import messaging from '@react-native-firebase/messaging';
-import NetInfo from '@react-native-community/netinfo';
 import firestore  from '@react-native-firebase/firestore';
 import CheckInvites from './CheckInvites';
 import MyEvents from './MyEvents';

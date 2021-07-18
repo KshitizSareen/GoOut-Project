@@ -6,7 +6,6 @@ import{
   TouchableOpacity,
   Alert,
   TextInput, Image,Dimensions,
-   KeyboardAvoidingView
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import auth from '@react-native-firebase/auth';
@@ -37,20 +36,11 @@ class SignIn extends Component{
             this.CheckIfLoggedIn();
         });
         messaging().onNotificationOpenedApp(remoteMessage=>{
-            console.log(
-              'Notification caused app to open from background state:',
-              remoteMessage.notification.body,
-            );
           })
           messaging()
         .getInitialNotification()
         .then(remoteMessage => {
           if (remoteMessage) {
-            console.log(
-              'Notification caused app to open from quit state:',
-              remoteMessage.notification.body,
-            );
-            console.log(remoteMessage.data);
           }
         }).catch(err=>{
             console.log(err);

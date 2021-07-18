@@ -1,20 +1,12 @@
 import React, {Component} from 'react';
-import NetInfo from '@react-native-community/netinfo';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {faArrowAltCircleRight, faFile, faImage,faPlay,faUpload} from '@fortawesome/free-solid-svg-icons';
-import { View,StyleSheet,Text,Alert,TouchableOpacity,FlatList,  TextInput,Dimensions,BackHandler,Image} from 'react-native';
+import {faUpload} from '@fortawesome/free-solid-svg-icons';
+import { View,Alert,TouchableOpacity,FlatList,Dimensions} from 'react-native';
 import firestore  from '@react-native-firebase/firestore';
-import storage from '@react-native-firebase/storage';
-import Modal from 'react-native-modal';
 import ImagePicker from 'react-native-image-crop-picker';
-import DocumentPicker from 'react-native-document-picker';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
-import RNFetchBlob from 'rn-fetch-blob';
-import RNFS from 'react-native-fs';
-import Video from 'react-native-video';
 import FastImage from 'react-native-fast-image';
-import { ScrollView } from 'react-native-gesture-handler';
 import ImageResizer from 'react-native-image-resizer';
 import {ProcessingManager} from 'react-native-video-processing';
 import { createThumbnail } from "react-native-create-thumbnail";
@@ -75,16 +67,12 @@ class EventMedia extends Component{
                     var ImageObject={};
                         ImageObject=image;
                     ImageObject.path=resizedImage.uri;
-                    /*console.log(resizedImage.width);
-                    console.log(resizedImage.height);
-                    console.log(resizedImage.size);*/
                     ImagesToSend.push(ImageObject);
                     if(ImagesToSend.length==images.length)
                                 {
                              this.props.navigation.navigate("Image Editing",{Images:ImagesToSend,SendMessage: this.SendMediaMessage,UserId:this.props.userid,eventid: this.props.eventid,User: this.state.User,FromMedia: true,LoadImage:this.LoadImage});
                                 }
                     }).catch(err => {
-                        console.log(err);
                         return Alert.alert(
                           'Unable to resize the photo',
                           'Check the console for full the error message',
@@ -135,7 +123,6 @@ class EventMedia extends Component{
                   <FlatList data={this.state.Media} initialNumToRender={3} style={{
                       margin: '1%'
                   }} numColumns={3} renderItem={(data)=>{
-                      //console.log(data.item);
                       if(data.item.MediaFile.Type==0)
                       {
                           return(

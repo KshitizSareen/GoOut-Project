@@ -1,17 +1,11 @@
 import React, {Component} from 'react';
-import NetInfo from '@react-native-community/netinfo';
-import { View,StyleSheet,Text, Alert,Dimensions,TouchableOpacity, TextInput,Image } from 'react-native';
-import { FlatList, ScrollView } from 'react-native-gesture-handler';
+import { View,Text, Alert,Dimensions,TouchableOpacity} from 'react-native';
+import { FlatList } from 'react-native-gesture-handler';
 import firestore from '@react-native-firebase/firestore';
-import CheckBox from '@react-native-community/checkbox';
-import DateTimePickerModal from "react-native-modal-datetime-picker";
-import Modal from 'react-native-modal';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faCannabis, faCheck, faCross, faInbox, faMinus, faPlus, faTimes, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faTimes, faUser } from '@fortawesome/free-solid-svg-icons';
 const windowWidth = Dimensions.get('window').width;
-const windowHeight = Dimensions.get('window').height;
 import FastImage from 'react-native-fast-image';
-import auth from '@react-native-firebase/auth';
 import messaging from '@react-native-firebase/messaging';
 import axios from 'axios';
 
@@ -27,7 +21,6 @@ class EventRequests extends Component{
     componentDidMount(){
         this.GetEventRequests();
         messaging().onMessage(async mess=>{
-            console.log(10);
             this.GetEventRequests();
         })
 
@@ -68,7 +61,9 @@ class EventRequests extends Component{
             {
                 MembersOf=doc.data().MembersOf;
             }
-            MembersOf.push(this.props.eventid);
+            var MembersOfSet=new Set(MembersOf);
+            MembersOfSet.add(this.props.eventid);
+            MembersOf=Array.from(MembersOfSet);
             var UserRequests=[];
             if(doc.data().UserRequests!=null)
             {
@@ -94,7 +89,9 @@ class EventRequests extends Component{
             {
                 Members=Event.data().Members;
             }
-            Members.push(User);
+            var MembersSet=new Set(Members);
+            MembersSet.add(User);
+            Members=Array.from(MembersSet);
             if(Event.data().EventRequests!=null)
             {
                 EventRequests=Event.data().EventRequests;
@@ -123,14 +120,15 @@ class EventRequests extends Component{
                         firestore().collection('Users').doc(Event.data().Members[i]).get().then(User=>{
                             if(User.data().NotificationToken!=null)
                             {
-                                axios.post("https://fcm.googleapis.com/fcm/send",{
+                                UserDoc.get().then(UserData=>{
+                                    axios.post("https://fcm.googleapis.com/fcm/send",{
     "to" : User.data().NotificationToken,
     "data":{
     
     },
     "notification":{
     "title": "GoOut",
-    "body": User.data().Username+" has joined "+Event.data().Name
+    "body": UserData.data().Username+" has joined "+Event.data().Name
     }
     },{
     headers:{
@@ -138,6 +136,7 @@ class EventRequests extends Component{
     "Content-Type": "application/json"
     },
     })
+ })
                             }
                         })
     

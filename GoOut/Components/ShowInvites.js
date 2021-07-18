@@ -1,17 +1,11 @@
 import React, {Component} from 'react';
-import NetInfo from '@react-native-community/netinfo';
-import { View,StyleSheet,Text, Alert,Dimensions,TouchableOpacity, TextInput,Image } from 'react-native';
-import { FlatList, ScrollView } from 'react-native-gesture-handler';
+import { View,Text, Alert,Dimensions,TouchableOpacity } from 'react-native';
+import { FlatList} from 'react-native-gesture-handler';
 import firestore from '@react-native-firebase/firestore';
-import CheckBox from '@react-native-community/checkbox';
-import DateTimePickerModal from "react-native-modal-datetime-picker";
-import Modal from 'react-native-modal';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faCannabis, faCheck, faCross, faInbox, faMinus, faPlus, faTimes, faUser } from '@fortawesome/free-solid-svg-icons';
+import {faMinus,faUser } from '@fortawesome/free-solid-svg-icons';
 const windowWidth = Dimensions.get('window').width;
-const windowHeight = Dimensions.get('window').height;
 import FastImage from 'react-native-fast-image';
-import auth from '@react-native-firebase/auth';
 import messaging from '@react-native-firebase/messaging';
 import axios from 'axios';
 
@@ -99,7 +93,6 @@ class ShowInvites extends Component{
                 }).then(()=>{
                     this.FetchInvites();
                     firestore().collection('Users').doc(UserID).get().then(User=>{
-                        console.log(User.data())
                         if(User.data().NotificationToken!=null)
                         {
                             axios.post("https://fcm.googleapis.com/fcm/send",{
@@ -120,7 +113,6 @@ Authorization: "key=AAAA7tNMKV0:APA91bEZHjBk7k1YayjyS_7HrM8rznxOyH-_1GHWH58hqyvm
                                 for(var i=0;i<Event.data().Members.length;i++)
                                 {
                                     firestore().collection('Users').doc(Event.data().Members[i]).get().then(User=>{
-                                        console.log(User.data());
                                         if(User.data().NotificationToken!=null)
                                         {
                                             axios.post("https://fcm.googleapis.com/fcm/send",{

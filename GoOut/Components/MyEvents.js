@@ -1,17 +1,11 @@
 import React, {Component} from 'react';
-import NetInfo from '@react-native-community/netinfo';
-import { View,StyleSheet,Text, Alert,Dimensions,TouchableOpacity, TextInput,Image } from 'react-native';
-import { FlatList, ScrollView } from 'react-native-gesture-handler';
+import { View,Text, Alert,Dimensions,TouchableOpacity } from 'react-native';
+import { FlatList } from 'react-native-gesture-handler';
 import firestore from '@react-native-firebase/firestore';
-import CheckBox from '@react-native-community/checkbox';
-import DateTimePickerModal from "react-native-modal-datetime-picker";
-import Modal from 'react-native-modal';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faCalendar, faCannabis, faCheck, faCross, faInbox, faMinus, faPlus, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faCalendar, faMinus } from '@fortawesome/free-solid-svg-icons';
 const windowWidth = Dimensions.get('window').width;
-const windowHeight = Dimensions.get('window').height;
 import FastImage from 'react-native-fast-image';
-import auth from '@react-native-firebase/auth';
 import messaging from '@react-native-firebase/messaging';
 import axios from 'axios';
 
@@ -26,7 +20,9 @@ class MyEvents extends Component{
         }
     }
     componentDidMount(){
+        this.unsubscribe=this.props.navigation.addListener('focus',()=>{
             this.GetEvents();
+        })
             messaging().onMessage(async mess=>{
                 this.GetEvents();
             })
@@ -139,7 +135,7 @@ class MyEvents extends Component{
         })
     }
     componentWillUnmount(){
-        console.log("exited");
+        this.unsubscribe();
     }
     render(){
         var ShowEvents=()=>{
